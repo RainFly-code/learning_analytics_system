@@ -1,0 +1,137 @@
+{
+  "actions": [
+    {
+      "action": "0",
+      "name": "action_0",
+      "video_files": ["0.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_0"
+    },
+    {
+      "action": "1", 
+      "name": "action_1",
+      "video_files": ["1.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_1"
+    },
+    {
+      "action": "2",
+      "name": "action_2", 
+      "video_files": ["2.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_2"
+    },
+    {
+      "action": "3",
+      "name": "action_3",
+      "video_files": ["3.mp4"],
+      "video_folder": "train", 
+      "data_folder": "csv/action_3"
+    },
+    {
+      "action": "4",
+      "name": "action_4",
+      "video_files": ["4.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_4"
+    },
+    {
+      "action": "5",
+      "name": "action_5",
+      "video_files": ["5.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_5"
+    },
+    {
+      "action": "6",
+      "name": "action_6",
+      "video_files": ["6.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_6"
+    },
+    {
+      "action": "7",
+      "name": "action_7",
+      "video_files": ["7.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_7"
+    },
+    {
+      "action": "8",
+      "name": "action_8",
+      "video_files": ["8.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_8"
+    },
+    {
+      "action": "9",
+      "name": "action_9",
+      "video_files": ["9.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_9"
+    },
+    {
+      "action": "10",
+      "name": "action_10",
+      "video_files": ["10.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_10"
+    },
+    {
+      "action": "11",
+      "name": "action_11",
+      "video_files": ["11.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_11"
+    },
+    {
+      "action": "12",
+      "name": "action_12",
+      "video_files": ["12.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_12"
+    },
+    {
+      "action": "13",
+      "name": "action_13",
+      "video_files": ["13.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_13"
+    },
+    {
+      "action": "14",
+      "name": "action_14",
+      "video_files": ["14.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_14"
+    },
+    {
+      "action": "15",
+      "name": "action_15",
+      "video_files": ["15.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_15"
+    },
+    {
+      "action": "16",
+      "name": "action_16",
+      "video_files": ["16.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_16"
+    },
+    {
+      "action": "17",
+      "name": "action_17",
+      "video_files": ["17.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_17"
+    },
+    {
+      "action": "18",
+      "name": "action_18",
+      "video_files": ["18.mp4"],
+      "video_folder": "train",
+      "data_folder": "csv/action_18"
+    }
+  ]
+}

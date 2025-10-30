@@ -1,0 +1,31 @@
+# Python 缓存与编译产物
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# IDE 配置
+.vscode/
+.idea/
+*.iml
+
+
+# 数据集（如未使用 Git LFS）
+datasets/
+*.zip
+*.tar.gz
+
+# 临时文件
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# 行为分类训练、预输出及输出目录
+behavior_classification/train/
+behavior_classification/pre_output/
+behavior_classification/output/
