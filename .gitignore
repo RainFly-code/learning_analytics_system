@@ -29,3 +29,10 @@ Thumbs.db
 behavior_classification/train/
 behavior_classification/pre_output/
 behavior_classification/output/
+
+# 模型权重与日志
+*.pt
+*.pth
+*.onnx
+runs/
+logs/
