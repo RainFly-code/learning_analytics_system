@@ -1,0 +1,308 @@
+{
+  "0c3af82afa524d67a2bf6ecf7ce69ac6": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result": {
+      "processed_video": "/processed/videos/0c3af82afa524d67a2bf6ecf7ce69ac6.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "liuqi",
+          "status": "Unknown"
+        }
+      ]
+    }
+  },
+  "5b642185e715486f8026bcd62ede733e": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result": {
+      "processed_video": "/processed/videos/5b642185e715486f8026bcd62ede733e.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "111",
+          "status": "Unknown"
+        }
+      ]
+    }
+  },
+  "45dd62499e064f80b1d49c9e715f188a": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result": {
+      "processed_video": "/processed/videos/45dd62499e064f80b1d49c9e715f188a.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "111",
+          "status": "Unknown"
+        }
+      ]
+    }
+  },
+  "fe569c07b2dc422daa831090839a1160": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result": {
+      "processed_video": "/processed/videos/fe569c07b2dc422daa831090839a1160.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "111",
+          "status": "Unknown"
+        }
+      ]
+    }
+  },
+  "009acc1fbd3c4b7782eb72ba76c27a19": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result": {
+      "processed_video": "/processed/videos/009acc1fbd3c4b7782eb72ba76c27a19.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "11",
+          "status": "Unknown"
+        }
+      ]
+    }
+  },
+  "b5b81448fd3d42a7bf2850db4e295f9c": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result": {
+      "processed_video": "/processed/videos/b5b81448fd3d42a7bf2850db4e295f9c.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "11",
+          "status": "Unknown"
+        }
+      ]
+    }
+  },
+  "beb9f358ab2e43d084eb0dd2b73731d8": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result": {
+      "processed_video": "/processed/videos/beb9f358ab2e43d084eb0dd2b73731d8.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "1",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "copy_only"
+    }
+  },
+  "a5e4f1713532455998b70682d7745431": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result": {
+      "processed_video": "/processed/videos/a5e4f1713532455998b70682d7745431.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "1111",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "copy_only"
+    }
+  },
+  "4f509da79d8144a588098ca9bedd674d": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result": {
+      "processed_video": "/processed/videos/4f509da79d8144a588098ca9bedd674d.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "111111",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "copy_only"
+    }
+  },
+  "8e9d6b336076412b933a1927715b4584": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（copy_only）",
+    "result": {
+      "processed_video": "/processed/videos/8e9d6b336076412b933a1927715b4584.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "111",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "copy_only"
+    }
+  },
+  "1f3f3211bf1b41ffaa77bf1ab8c0ab53": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（copy_only）",
+    "result": {
+      "processed_video": "/processed/videos/1f3f3211bf1b41ffaa77bf1ab8c0ab53.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "sss",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "copy_only"
+    }
+  },
+  "8d64dade415843fb992cbb6a00ae3fbb": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（copy_only）：[ONNXRuntimeError] : 3 : NO_SUCHFILE : Load model from behavior_classification\\weights\\yolo11s-pose.onnx failed:Load model behavior_classification\\weights\\yolo11s-pose.onnx failed. File doesn't exist",
+    "result": {
+      "processed_video": "/processed/videos/8d64dade415843fb992cbb6a00ae3fbb.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "111",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "copy_only"
+    }
+  },
+  "ee37b2d6734c49b58395b03054797724": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）",
+    "result": {
+      "processed_video": "/processed/videos/ee37b2d6734c49b58395b03054797724.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "111",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  }
+}

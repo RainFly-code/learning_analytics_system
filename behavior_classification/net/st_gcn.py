@@ -2,8 +2,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from net.utils.tgcn import ConvTemporalGraphical
-from net.utils.graph import Graph
+try:
+    from .utils.tgcn import ConvTemporalGraphical
+    from .utils.graph import Graph
+except Exception:
+    from net.utils.tgcn import ConvTemporalGraphical
+    from net.utils.graph import Graph
 
 class Model(nn.Module):
     r"""Spatial temporal graph convolutional networks.

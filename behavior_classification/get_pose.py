@@ -6,6 +6,14 @@ import cv2
 import onnxruntime
 import warnings
 import argparse
+from collections import deque
+try:
+    from .predict import SkeletonPredictor
+except Exception:
+    try:
+        from predict import SkeletonPredictor
+    except Exception:
+        SkeletonPredictor = None
 
 warnings.filterwarnings("ignore")
 
@@ -194,8 +202,9 @@ def process_frame(ort_session, img, conf_threshold=0.1):
     return img, first_person_kpts, det_bboxes[0]
 
 
-def process_video(model_path, input_video_path, output_csv_path, output_video_path=None,conf_threshold=0.1):
-    """ 处理整个视频并保存骨骼数据到CSV """
+def process_video(model_path, input_video_path, output_csv_path, output_video_path=None, conf_threshold=0.1,
+                  predictor: SkeletonPredictor = None, action_mapping: dict = None, window_size: int = 50):
+    """ 处理整个视频并保存骨骼数据到CSV，并在可用时叠加行为类别与置信度 """
     # 初始化模型
     ort_session = initialize_session(model_path)
 
@@ -224,9 +233,29 @@ def process_video(model_path, input_video_path, output_csv_path, output_video_pa
                                                                                                     in range(17)]
     csv_file.write(','.join(csv_header) + '\n')
 
+    # 滑动窗口缓存（用于行为预测）
+    skeleton_buffer = deque(maxlen=window_size)
+
+    def create_temp_csv(skeleton_data):
+        import pandas as pd
+        rows = []
+        for frame_idx, frame_kpts in enumerate(skeleton_data):
+            xs = frame_kpts[:, 0]
+            ys = frame_kpts[:, 1]
+            confs = frame_kpts[:, 2]
+            rows.append([frame_idx] + list(xs) + list(ys) + list(confs))
+        header = ['frame'] + [f'kp_{i}_x' for i in range(17)] + [f'kp_{i}_y' for i in range(17)] + [f'kp_{i}_conf' for i in range(17)]
+        import os
+        import pandas as pd
+        df = pd.DataFrame(rows, columns=header)
+        temp_csv_path = os.path.join(os.path.dirname(output_csv_path), 'temp_window.csv')
+        df.to_csv(temp_csv_path, index=False)
+        return temp_csv_path
+
     # 处理每一帧
     frame_count = 0
     start_time = time.time()
+    last_pred = None
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -245,10 +274,53 @@ def process_video(model_path, input_video_path, output_csv_path, output_video_pa
             confs = kpts_reshaped[:, 2]
             row_data = [str(frame_count)] + [str(x) for x in xs] + [str(y) for y in ys] + [str(c) for c in confs]
             csv_file.write(','.join(row_data) + '\n')
+            skeleton_buffer.append(kpts_reshaped)
         else:
             # 如果没有检测到关键点，写入空数据
             empty_data = [str(frame_count)] + ['0'] * 51
             csv_file.write(','.join(empty_data) + '\n')
+            skeleton_buffer.append(np.zeros((17, 3)))
+
+        # 始终绘制人物紧凑矩形框（基于关键点），确保无论是否有预测都能看到边框
+        if kpts is not None:
+            try:
+                k = kpts.reshape(-1, 3)
+                v = k[k[:, 2] > 0.5]
+                if len(v) > 0:
+                    min_x, max_x = int(np.min(v[:, 0])), int(np.max(v[:, 0]))
+                    min_y, max_y = int(np.min(v[:, 1])), int(np.max(v[:, 1]))
+                    mx = max(int((max_x - min_x) * 0.1), 20)
+                    my = max(int((max_y - min_y) * 0.1), 20)
+                    x, y = max(0, min_x - mx), max(0, min_y - my)
+                    w = min(processed_frame.shape[1] - x, max_x - min_x + 2 * mx)
+                    h = min(processed_frame.shape[0] - y, max_y - min_y + 2 * my)
+                    cv2.rectangle(processed_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+                    # 若有预测器与映射，则在框旁显示类别与置信度
+                    if predictor is not None and action_mapping:
+                        if len(skeleton_buffer) >= window_size and frame_count % 5 == 0:
+                            temp_csv = create_temp_csv(list(skeleton_buffer))
+                            last_pred = predictor.predict(temp_csv)
+                        pred = last_pred
+                        if pred:
+                            cls_id = pred.get('class')
+                            prob = float(pred.get('probability', 0.0))
+                            cls_name = action_mapping.get(cls_id, f"Action {cls_id}")
+                            action_text = f"{cls_name}"
+                            conf_text = f"{prob:.1%}"
+                            font = cv2.FONT_HERSHEY_SIMPLEX
+                            fs, th = 0.6, 2
+                            (tw1, th1), _ = cv2.getTextSize(action_text, font, fs, th)
+                            (tw2, th2), _ = cv2.getTextSize(conf_text, font, fs, th)
+                            bg_w = max(tw1, tw2) + 10
+                            bg_h = th1 + th2 + 15
+                            tx, ty = max(0, x), max(bg_h, y)
+                            cv2.rectangle(processed_frame, (tx, ty - bg_h), (tx + bg_w, ty), (0, 0, 0), -1)
+                            cv2.rectangle(processed_frame, (tx, ty - bg_h), (tx + bg_w, ty), (0, 255, 0), 2)
+                            cv2.putText(processed_frame, action_text, (tx + 5, ty - th2 - 8), font, fs, (0, 255, 0), th)
+                            cv2.putText(processed_frame, conf_text, (tx + 5, ty - 3), font, fs, (0, 255, 0), th)
+            except Exception:
+                pass
 
         # 写入输出视频（如果需要）
         if out:

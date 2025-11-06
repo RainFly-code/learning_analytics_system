@@ -30,14 +30,16 @@ behavior_classification/train/
 behavior_classification/pre_output/
 behavior_classification/output/
 
-# 模型文件
+模型文件
 *.pt
 *.pth
 *.onnx
 *.weights
 
-# 训练输出
+训练输出
 runs/
 checkpoints/
 output/
 
+web/backend/processed/videos
+web/backend/upload/videos/videos

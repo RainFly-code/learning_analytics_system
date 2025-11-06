@@ -6,8 +6,14 @@ import json
 import time
 from collections import deque
 import argparse
-from predict import SkeletonPredictor
-from get_pose import initialize_session, process_frame, plot_skeleton_kpts
+try:
+    from .predict import SkeletonPredictor
+except Exception:
+    from predict import SkeletonPredictor
+try:
+    from .get_pose import initialize_session, process_frame, plot_skeleton_kpts
+except Exception:
+    from get_pose import initialize_session, process_frame, plot_skeleton_kpts
 
 
 class RealTimeActionDetector:

@@ -2,7 +2,10 @@ import torch
 import numpy as np
 import pandas as pd
 from torch import nn
-from net.st_gcn import Model
+try:
+    from .net.st_gcn import Model
+except Exception:
+    from net.st_gcn import Model
 import json
 import argparse
 

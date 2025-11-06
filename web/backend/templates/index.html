@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>多维学情剖析系统数据面板</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0b1220; --panel:#0f1a2e; --card:#111b33; --border:#1b2a4a; --muted:#9fb2d9; --primary:#1f6feb; --success:#22c55e; --warning:#f59e0b;
+    }
+    * { box-sizing:border-box; }
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:#e8eef9; margin:0; }
+    header { background:var(--panel); border-bottom:1px solid var(--border); padding:10px 16px; display:flex; align-items:center; justify-content:center; }
+    header h1 { font-size:20px; letter-spacing:1px; margin:0; }
+    .wrap { padding:12px 16px; display:grid; grid-template-columns: 260px 1fr 320px; gap:12px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; }
+    .title { font-size:14px; color:var(--muted); margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; }
+    .stat-row { display:grid; grid-template-columns: repeat(6, 1fr); gap:10px; margin-bottom:12px; }
+    .stat { background:#0c1528; border:1px solid var(--border); border-radius:8px; padding:10px; }
+    .stat .val { font-size:20px; font-weight:700; }
+    .video { position:relative; }
+    .video video { width:100%; border-radius:8px; border:1px solid var(--border); }
+    .video .overlay { position:absolute; left:12px; top:12px; background:#0c1528cc; border:1px dashed #294064; padding:8px; border-radius:8px; font-size:12px; }
+    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .grid-3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
+    .line { height:100px; background:linear-gradient(180deg,#0c1528,#0b1220); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; }
+    .line canvas { position:absolute; inset:0; }
+    .pie { height:140px; display:flex; align-items:center; justify-content:center; }
+    .bar { height:100px; display:flex; align-items:flex-end; gap:6px; }
+    .bar div { width:14%; background:#334155; border:1px solid var(--border); border-radius:4px; }
+    .footer { margin-top:10px; }
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    th, td { border-bottom:1px solid var(--border); padding:6px; text-align:left; }
+    .muted { color:var(--muted); }
+    .fab { position:fixed; right:20px; bottom:20px; background:var(--primary); color:#fff; border:none; border-radius:999px; padding:12px 16px; font-weight:700; cursor:pointer; box-shadow:0 6px 18px rgba(31,111,235,.3); }
+    /* Modal 样式统一深色系并增加层次与动效 */
+    .modal { position:fixed; inset:0; background:rgba(9,14,25,.55); backdrop-filter: blur(3px); display:none; align-items:center; justify-content:center; }
+    .modal .content { width:720px; border-radius:14px; padding:18px; border:1px solid #23375d; box-shadow: 0 12px 32px rgba(0,0,0,.35);
+      background: linear-gradient(180deg, #0f1a2e 0%, #0c1528 100%); }
+    .modal .title { padding-bottom:8px; border-bottom:1px solid var(--border); }
+    .form { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    input[type="text"], textarea, input[type="file"] { width:100%; padding:10px; border-radius:10px; border:1px solid #274166; background:#0c1528; color:#e8eef9; transition:border-color .2s, box-shadow .2s; }
+    input[type="text"]::placeholder, textarea::placeholder { color:#7d96c3; }
+    input[type="text"]:focus, textarea:focus, input[type="file"]:focus { outline:none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(31,111,235,.25); }
+    .btn { background:var(--primary); color:#fff; border:none; border-radius:10px; padding:10px 16px; font-weight:700; cursor:pointer; box-shadow:0 6px 16px rgba(31,111,235,.3); }
+    .btn:disabled { background:#294064; cursor:not-allowed; box-shadow:none; }
+    .btn-sec { background:#26364f; color:#dbe7ff; }
+    .progress { height:8px; background:#0c1528; border-radius:6px; overflow:hidden; border:1px solid #294064; }
+    .progress > div { height:100%; background:var(--success); width:0%; transition: width 0.3s ease; }
+  </style>
+</head>
+<body>
+  <header><h1>多维学情剖析系统数据面板</h1></header>
+
+  <div class="wrap">
+    <!-- 左侧列 -->
+    <div>
+      <div class="card">
+        <div class="title">当前课堂状态分析</div>
+        <div class="line"><canvas id="lineLeft"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="title">未出勤人员 <span id="absentCount" class="muted">0人</span></div>
+        <table>
+          <thead><tr><th>学号</th><th>姓名</th><th>状态</th></tr></thead>
+          <tbody id="absentBody"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="title">学生个体综合评价</div>
+        <div class="pie"><canvas id="pieLeft" width="140" height="140"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="title">不良课堂状态分布</div>
+        <div class="bar" id="barLeft"></div>
+      </div>
+    </div>
+
+    <!-- 中间列 -->
+    <div>
+      <div class="stat-row">
+        <div class="stat"><div class="muted">当前课堂指数</div><div id="statIndex" class="val">7.5</div></div>
+        <div class="stat"><div class="muted">当节教学指数</div><div id="statTeach" class="val">3401</div></div>
+        <div class="stat"><div class="muted">本日异常次数</div><div id="statAbn" class="val">5</div></div>
+        <div class="stat"><div class="muted">当前到课人数</div><div id="statAttend" class="val">0</div></div>
+        <div class="stat"><div class="muted">设备报警统计</div><div id="statDevice" class="val">150</div></div>
+        <div class="stat"><div class="muted">切换教室</div><div class="muted">（占位）</div></div>
+      </div>
+      <div class="card video">
+        <div class="title">课堂监控画面</div>
+        <video id="resultVideo" controls></video>
+        <div class="overlay">
+          <div>课程：<span id="ovCourse">—</span></div>
+          <div>教师：<span id="ovTeacher">—</span></div>
+          <div>到课：<span id="ovAttend">0</span> 人</div>
+          <div>异常：<span id="ovAbn">0</span> 次</div>
+        </div>
+      </div>
+      <div class="grid-3 footer">
+        <div class="card">
+          <div class="title">课堂状态</div>
+          <div class="grid-3">
+            <div class="stat"><div class="muted">低头</div><div id="stDown" class="val">0</div></div>
+            <div class="stat"><div class="muted">睡觉</div><div id="stSleep" class="val">0</div></div>
+            <div class="stat"><div class="muted">举手</div><div id="stRaise" class="val">0</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="title">签到表</div>
+          <table>
+            <thead><tr><th>姓名</th><th>状态</th></tr></thead>
+            <tbody id="attendanceBody"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="title">状态抓拍</div>
+          <div class="grid-3" id="snapshots">
+            <div class="stat"><div class="muted">占位</div><div class="val">—</div></div>
+            <div class="stat"><div class="muted">占位</div><div class="val">—</div></div>
+            <div class="stat"><div class="muted">占位</div><div class="val">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧列 -->
+    <div>
+      <div class="card">
+        <div class="title">学生人数变化统计</div>
+        <div class="line"><canvas id="lineRight1"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="title">学生课堂统计</div>
+        <div class="pie"><canvas id="pieRight" width="160" height="160"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="title">上课次数变化统计</div>
+        <div class="line"><canvas id="lineRight2"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 上传浮窗 -->
+  <button class="fab" id="fabUpload">上传课程视频</button>
+  <div class="modal" id="modalUpload">
+    <div class="content">
+      <div class="title"><strong>课程信息上传</strong><span id="statusText" class="muted"></span></div>
+      <div class="form">
+        <div>
+          <label class="muted">课程名称</label>
+          <input id="courseName" type="text" placeholder="如：高数-第5周" />
+        </div>
+        <div>
+          <label class="muted">课程简介</label>
+          <input id="courseDesc" type="text" placeholder="简要描述" />
+        </div>
+        <div style="grid-column: 1 / span 2;">
+          <label class="muted">学生名单（每行一个名字）</label>
+          <textarea id="students" rows="5" placeholder="张三\n李四\n..."></textarea>
+        </div>
+        <div style="grid-column: 1 / span 2;">
+          <label class="muted">课程监控视频</label>
+          <input id="videoFile" type="file" accept="video/*" />
+        </div>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:10px; align-items:center; justify-content:flex-end;">
+        <button id="closeModal" class="btn btn-sec">关闭</button>
+        <button id="uploadBtn" class="btn">上传并处理</button>
+      </div>
+      <div class="progress" style="margin-top:10px;">
+        <div id="progressBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 元素引用
+    const resultVideo = document.getElementById('resultVideo');
+    const ovCourse = document.getElementById('ovCourse');
+    const ovTeacher = document.getElementById('ovTeacher');
+    const ovAttend = document.getElementById('ovAttend');
+    const ovAbn = document.getElementById('ovAbn');
+    const statAttend = document.getElementById('statAttend');
+    const stDown = document.getElementById('stDown');
+    const stSleep = document.getElementById('stSleep');
+    const stRaise = document.getElementById('stRaise');
+    const attendanceBody = document.getElementById('attendanceBody');
+    const absentBody = document.getElementById('absentBody');
+    const absentCount = document.getElementById('absentCount');
+
+    const fabUpload = document.getElementById('fabUpload');
+    const modalUpload = document.getElementById('modalUpload');
+    const closeModal = document.getElementById('closeModal');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const statusText = document.getElementById('statusText');
+    const progressBar = document.getElementById('progressBar');
+
+    let pollTimer = null;
+
+    // 简易图表占位渲染
+    function drawLine(canvasId, points=[]) {
+      const el = document.getElementById(canvasId); if (!el) return;
+      const ctx = el.getContext('2d'); const w = el.width = el.parentElement.clientWidth; const h = el.height = el.parentElement.clientHeight;
+      ctx.clearRect(0,0,w,h); ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 2; ctx.beginPath();
+      points = points.length? points : Array.from({length:24}, (_,i)=> Math.sin(i/3)*0.4 + 0.5 + Math.random()*0.2);
+      points.forEach((p,i)=>{ const x = i*(w/(points.length-1)); const y = h - p*h; i? ctx.lineTo(x,y): ctx.moveTo(x,y); }); ctx.stroke();
+    }
+    function drawPie(canvasId, values=[40,30,20,10]) {
+      const el = document.getElementById(canvasId); if (!el) return; const ctx = el.getContext('2d'); const r = Math.min(el.width, el.height)/2 - 6; const cx = el.width/2, cy = el.height/2;
+      const colors = ['#1f6feb','#22c55e','#f59e0b','#ef4444']; const total = values.reduce((a,b)=>a+b,0); let start=0;
+      values.forEach((v,i)=>{ const ang = (v/total)*Math.PI*2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,start+ang); ctx.closePath(); ctx.fillStyle=colors[i%colors.length]; ctx.fill(); start+=ang; });
+      ctx.beginPath(); ctx.arc(cx,cy,r*0.55,0,Math.PI*2); ctx.fillStyle = '#0b1220'; ctx.fill();
+    }
+    function drawBars(containerId, values=[20,45,30,25,35,40]) {
+      const el = document.getElementById(containerId); if (!el) return; el.innerHTML=''; const max = Math.max(...values);
+      values.forEach(v=>{ const d=document.createElement('div'); d.style.height = (v/max*100)+'%'; el.appendChild(d); });
+    }
+
+    // 初始渲染占位
+    drawLine('lineLeft'); drawLine('lineRight1'); drawLine('lineRight2');
+    drawPie('pieLeft'); drawPie('pieRight');
+    drawBars('barLeft');
+
+    // 上传交互
+    fabUpload.onclick = () => { modalUpload.style.display = 'flex'; };
+    closeModal.onclick = () => { modalUpload.style.display = 'none'; };
+
+    function toFormData() {
+      const fd = new FormData();
+      fd.append('course_name', document.getElementById('courseName').value);
+      fd.append('course_desc', document.getElementById('courseDesc').value);
+      const students = document.getElementById('students').value.split('\n').filter(Boolean).map(n => ({ name: n.trim() }));
+      fd.append('students', JSON.stringify(students));
+      const file = document.getElementById('videoFile').files[0];
+      if (file) fd.append('video', file);
+      return fd;
+    }
+
+    function setProgress(pct, msg) { progressBar.style.width = (pct||0) + '%'; statusText.textContent = msg || ''; }
+
+    async function startUpload() {
+      uploadBtn.disabled = true; setProgress(0, '正在上传...');
+      try {
+        const res = await fetch('/api/courses/upload', { method: 'POST', body: toFormData() });
+        const data = await res.json(); if (!data.job_id) throw new Error('创建任务失败');
+        modalUpload.style.display = 'none'; pollStatus(data.job_id);
+      } catch (e) { setProgress(0, '上传失败: ' + e.message); uploadBtn.disabled = false; }
+    }
+
+    async function pollStatus(jobId) {
+      clearInterval(pollTimer);
+      pollTimer = setInterval(async () => {
+        try {
+          const s = await (await fetch('/api/jobs/' + jobId + '/status')).json(); setProgress(s.progress || 0, s.message || '');
+          if (s.status === 'completed' || s.status === 'error') {
+            clearInterval(pollTimer);
+            const r = await (await fetch('/api/jobs/' + jobId + '/result')).json();
+            if (r.processed_video) { resultVideo.src = r.processed_video; }
+            const stats = r.behavior_stats || {}; const abnormal = (stats['Raising Hand']||0) + (stats['Standing']||0) + (stats['Passing Objects']||0) + (stats['Turning Around']||0) + (stats['Sleeping']||0) + (stats['Looking Down']||0);
+            stDown.textContent = (stats['Looking Down']||0); stSleep.textContent = (stats['Sleeping']||0); stRaise.textContent = (stats['Raising Hand']||0);
+            const list = r.attendance || []; const present = list.filter(i => i.status === 'Present').length; statAttend.textContent = present; ovAttend.textContent = present; ovAbn.textContent = abnormal;
+            attendanceBody.innerHTML = list.map(i => `<tr><td>${i.name}</td><td>${i.status}</td></tr>`).join('');
+            const absent = list.filter(i => i.status !== 'Present'); absentCount.textContent = absent.length + '人';
+            absentBody.innerHTML = absent.map((i,idx)=> `<tr><td>${20230000+idx}</td><td>${i.name}</td><td>${i.status}</td></tr>`).join('');
+            ovCourse.textContent = document.getElementById('courseName').value || '—'; ovTeacher.textContent = '—';
+            uploadBtn.disabled = false;
+          }
+        } catch (e) { /* 忽略短暂轮询错误 */ }
+      }, 1500);
+    }
+
+    uploadBtn.addEventListener('click', startUpload);
+  </script>
+</body>
+</html>
