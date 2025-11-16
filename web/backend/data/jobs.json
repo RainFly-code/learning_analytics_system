@@ -544,5 +544,165 @@
       ],
       "pipeline": "realtime"
     }
+  },
+  "db46f16164bf497b903f8d7882822020": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 1 张人脸，识别成功 1 张，最高相似度 0.81；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/db46f16164bf497b903f8d7882822020.mp4",
+      "behavior_stats": {
+        "Normal Listening": 0,
+        "Raising Hand": 0,
+        "Standing": 846,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "d36566f0b45a439db577060041782eac": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/d36566f0b45a439db577060041782eac.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪\\n周雨飞",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "901f19a69e9847f4a085beb3b529f0ff": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/901f19a69e9847f4a085beb3b529f0ff.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "周雨飞",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "9a8200a566fc4a2182a3a8582791a052": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 450 张人脸，识别成功 450 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/9a8200a566fc4a2182a3a8582791a052.mp4",
+      "behavior_stats": {
+        "Normal Listening": 862,
+        "Raising Hand": 0,
+        "Standing": 0,
+        "Passing Objects": 0,
+        "Turning Around": 0,
+        "Sleeping": 0,
+        "Looking Down": 0
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "周雨飞",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "7713d496a409460091d7ece42c53b930": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/7713d496a409460091d7ece42c53b930.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "周雨飞",
+          "status": "Unknown"
+        },
+        {
+          "name": "刘琪",
+          "status": "Present"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "e18e7ff357a6464383d892eb6ae1108d": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/e18e7ff357a6464383d892eb6ae1108d.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "周雨飞",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
   }
 }

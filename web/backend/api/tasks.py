@@ -179,12 +179,13 @@ def start_processing_job(job_id: str, video_path: Path, students: list):
                     conf_threshold=0.4,
                 )
                 # 先输出到临时文件，再统一转码到H.264
-                detector.run_video(str(video_path), str(tmp_video))
+                stats_rt = detector.run_video(str(video_path), str(tmp_video))
+                if isinstance(stats_rt, dict):
+                    # 将实时统计结果写入行为统计
+                    for k in behavior_stats.keys():
+                        behavior_stats[k] = int(stats_rt.get(k, 0))
                 transcode_to_h264(tmp_video, processed_video)
                 pipeline_mode = 'realtime'
-                # 简单统计：读取处理进度期间累计稳定预测（演示）
-                # 实际统计可在 real_time_detection 里扩展返回帧级类别
-                # 这里保留空统计以保证端到端流程
             except Exception as e:
                 # 回退1：仅做骨骼绘制并复制输出视频
                 try:
@@ -217,6 +218,50 @@ def start_processing_job(job_id: str, video_path: Path, students: list):
                         window_size=50
                     )
                     transcode_to_h264(tmp_video, processed_video)
+                    # 使用窗口滑动对CSV进行真实统计（课堂维度）
+                    try:
+                        if predictor is not None:
+                            # 读取原CSV头以便重用
+                            import csv as _csv
+                            rows = []
+                            with open(str(csv_out), 'r', encoding='utf-8') as f:
+                                reader = _csv.reader(f)
+                                header = next(reader, None)
+                                for row in reader:
+                                    rows.append(row)
+                            # 创建复用的窗口文件
+                            tmp_window = _safe_path(Path(settings.PROCESSED_DIR) / f'{job_id}_window.csv')
+                            step = 5
+                            win = 50
+                            action_map_local = action_mapping_local
+                            # 累计统计
+                            for start in range(0, max(0, len(rows) - 1), step):
+                                end = min(start + win, len(rows))
+                                if end - start < 10:
+                                    break
+                                try:
+                                    with open(str(tmp_window), 'w', encoding='utf-8', newline='') as wf:
+                                        w = _csv.writer(wf)
+                                        if header:
+                                            w.writerow(header)
+                                        for r in rows[start:end]:
+                                            w.writerow(r)
+                                    pred = predictor.predict(str(tmp_window))
+                                    cls_name = pred.get('class_name') if isinstance(pred, dict) else None
+                                    # 统一名称（预测器返回英文名称，与本地映射一致）
+                                    if cls_name in behavior_stats:
+                                        behavior_stats[cls_name] += 1
+                                    else:
+                                        # 若返回ID字符串映射
+                                        cls_id = pred.get('class') if isinstance(pred, dict) else None
+                                        if cls_id is not None:
+                                            nm = action_map_local.get(int(cls_id), None)
+                                            if nm and nm in behavior_stats:
+                                                behavior_stats[nm] += 1
+                                except Exception:
+                                    continue
+                    except Exception:
+                        pass
                     pipeline_mode = 'fallback_pose'
                     storage.set_job(job_id, {
                         'status': 'processing', 'progress': 40,

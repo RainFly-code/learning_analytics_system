@@ -442,6 +442,17 @@ class RealTimeActionDetector:
         else:
             out = None
         
+        # 课堂行为统计（基于平滑后的预测结果按帧累计）
+        behavior_counts = {
+            "Normal Listening": 0,
+            "Raising Hand": 0,
+            "Standing": 0,
+            "Passing Objects": 0,
+            "Turning Around": 0,
+            "Sleeping": 0,
+            "Looking Down": 0,
+        }
+
         frame_count = 0
         while True:
             ret, frame = cap.read()
@@ -471,6 +482,15 @@ class RealTimeActionDetector:
                 
                 # 绘制结果
                 result_frame = self.draw_results(frame, kpts, bbox, prediction)
+
+                # 累计课堂行为统计（按帧计数）
+                try:
+                    if prediction and isinstance(prediction, dict):
+                        name = prediction.get('class_name')
+                        if name in behavior_counts:
+                            behavior_counts[name] += 1
+                except Exception:
+                    pass
                 
                 # 检查结果帧是否有效
                 if result_frame is None or result_frame.size == 0:
@@ -501,6 +521,8 @@ class RealTimeActionDetector:
             out.release()
         cv2.destroyAllWindows()
         print("视频处理完成")
+        # 返回统计结果供后端使用
+        return behavior_counts
 
 
 if __name__ == "__main__":

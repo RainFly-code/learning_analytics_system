@@ -10,27 +10,42 @@
   <style>
     :root {
       --bg:#0b1220; --panel:#0f1a2e; --card:#111b33; --border:#1b2a4a; --muted:#9fb2d9; --primary:#1f6feb; --success:#22c55e; --warning:#f59e0b;
+      --video-h: 420px;
     }
     * { box-sizing:border-box; }
     body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:#e8eef9; margin:0; }
     header { background:var(--panel); border-bottom:1px solid var(--border); padding:10px 16px; display:flex; align-items:center; justify-content:center; }
     header h1 { font-size:20px; letter-spacing:1px; margin:0; }
-    .wrap { padding:12px 16px; display:grid; grid-template-columns: 260px 1fr 320px; gap:12px; }
+    .wrap { padding:12px 16px; display:grid; grid-template-columns: 280px 1fr 320px; gap:10px; align-items:stretch; }
+    .col { display:flex; flex-direction:column; gap:10px; height:100%; }
+    .col-top { height: var(--video-h); display:grid; grid-template-rows: 1fr 1fr; gap:10px; overflow:hidden; }
+    .push-bottom { margin-top:auto; }
     .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; }
     .title { font-size:14px; color:var(--muted); margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; }
-    .stat-row { display:grid; grid-template-columns: repeat(6, 1fr); gap:10px; margin-bottom:12px; }
+    .stat-row { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:10px; }
     .stat { background:#0c1528; border:1px solid var(--border); border-radius:8px; padding:10px; }
     .stat .val { font-size:20px; font-weight:700; }
     .video { position:relative; }
-    .video video { width:100%; border-radius:8px; border:1px solid var(--border); }
+    .video video { width:100%; height: var(--video-h); border-radius:8px; border:1px solid var(--border); object-fit: contain; aspect-ratio: 16 / 9; background:#0c1528; display:block; }
     .video .overlay { position:absolute; left:12px; top:12px; background:#0c1528cc; border:1px dashed #294064; padding:8px; border-radius:8px; font-size:12px; }
     .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .grid-3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
-    .line { height:100px; background:linear-gradient(180deg,#0c1528,#0b1220); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; }
+    .line { height:160px; background:var(--card); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; }
     .line canvas { position:absolute; inset:0; }
-    .pie { height:140px; display:flex; align-items:center; justify-content:center; }
-    .bar { height:100px; display:flex; align-items:flex-end; gap:6px; }
+    .pie { height:200px; display:flex; align-items:center; justify-content:center; }
+    .legend { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; color:var(--muted); font-size:12px; }
+    .legend-item { display:flex; align-items:center; gap:6px; }
+    .legend-swatch { width:10px; height:10px; border-radius:2px; border:1px solid var(--border); }
+    /* 顶部容器两张卡片各占一行，图表填满卡片 */
+    .col-top .card { display:flex; flex-direction:column; }
+    .col-top .line { height:100%; }
+    .col-top .pie { height:100%; }
+    .bar { height:80px; display:flex; align-items:flex-end; gap:6px; }
     .bar div { width:14%; background:#334155; border:1px solid var(--border); border-radius:4px; }
+    /* 左侧底部柱状图加高，便于与中间底部区域对齐 */
+    #barLeft { height:140px; }
+    /* 右侧底部线图容器加高，便于与中间底部区域对齐 */
+    #lineRight2Wrap { height:200px; }
     .footer { margin-top:10px; }
     table { width:100%; border-collapse:collapse; font-size:12px; }
     th, td { border-bottom:1px solid var(--border); padding:6px; text-align:left; }
@@ -57,21 +72,26 @@
 
   <div class="wrap">
     <!-- 左侧列 -->
-    <div>
-      <div class="card">
-        <div class="title">当前课堂状态分析</div>
-        <div class="line"><canvas id="lineLeft"></canvas></div>
+    <div class="col col-left">
+      <!-- 顶部：与右侧保持一致的两张图表，无滚动且与视频下沿对齐 -->
+      <div class="col-top">
+        <div class="card">
+          <div class="title">当前课堂状态分析</div>
+          <div class="line"><canvas id="lineLeft"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="title">课堂维度综合评价（全班）</div>
+          <div class="pie"><canvas id="pieLeft" width="180" height="180"></canvas></div>
+          <div class="legend" id="legendLeft"></div>
+        </div>
       </div>
-      <div class="card">
+      <!-- 底部：其余信息，避免挤占顶部高度 -->
+      <div class="card push-bottom">
         <div class="title">未出勤人员 <span id="absentCount" class="muted">0人</span></div>
         <table>
           <thead><tr><th>学号</th><th>姓名</th><th>状态</th></tr></thead>
           <tbody id="absentBody"></tbody>
         </table>
-      </div>
-      <div class="card">
-        <div class="title">学生个体综合评价</div>
-        <div class="pie"><canvas id="pieLeft" width="140" height="140"></canvas></div>
       </div>
       <div class="card">
         <div class="title">不良课堂状态分布</div>
@@ -80,14 +100,11 @@
     </div>
 
     <!-- 中间列 -->
-    <div>
+    <div class="col col-center">
       <div class="stat-row">
-        <div class="stat"><div class="muted">当前课堂指数</div><div id="statIndex" class="val">7.5</div></div>
-        <div class="stat"><div class="muted">当节教学指数</div><div id="statTeach" class="val">3401</div></div>
-        <div class="stat"><div class="muted">本日异常次数</div><div id="statAbn" class="val">5</div></div>
+        <div class="stat"><div class="muted">当前课堂指数</div><div id="statIndex" class="val">0.0</div></div>
+        <div class="stat"><div class="muted">当节教学指数</div><div id="statTeach" class="val">0</div></div>
         <div class="stat"><div class="muted">当前到课人数</div><div id="statAttend" class="val">0</div></div>
-        <div class="stat"><div class="muted">设备报警统计</div><div id="statDevice" class="val">150</div></div>
-        <div class="stat"><div class="muted">切换教室</div><div class="muted">（占位）</div></div>
       </div>
       <div class="card video">
         <div class="title">课堂监控画面</div>
@@ -127,18 +144,21 @@
     </div>
 
     <!-- 右侧列 -->
-    <div>
-      <div class="card">
-        <div class="title">学生人数变化统计</div>
-        <div class="line"><canvas id="lineRight1"></canvas></div>
+    <div class="col col-right">
+      <div class="col-top">
+        <div class="card">
+          <div class="title">课堂质量趋势</div>
+          <div class="line"><canvas id="lineRight1"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="title">学生课堂统计</div>
+          <div class="pie"><canvas id="pieRight" width="180" height="180"></canvas></div>
+          <div class="legend" id="legendRight"></div>
+        </div>
       </div>
-      <div class="card">
-        <div class="title">学生课堂统计</div>
-        <div class="pie"><canvas id="pieRight" width="160" height="160"></canvas></div>
-      </div>
-      <div class="card">
+      <div class="card push-bottom">
         <div class="title">上课次数变化统计</div>
-        <div class="line"><canvas id="lineRight2"></canvas></div>
+        <div class="line" id="lineRight2Wrap"><canvas id="lineRight2"></canvas></div>
       </div>
     </div>
   </div>
@@ -200,6 +220,20 @@
 
     let pollTimer = null;
 
+    // 饼图颜色与标签（统一 5 类）
+    const PIE_COLORS = ['#1f6feb','#22c55e','#f59e0b','#ef4444','#8b5cf6'];
+    const PIE_LABELS = ['注意力','互动','分心','纪律','睡眠'];
+
+    function renderLegend(legendId, labels=PIE_LABELS, colors=PIE_COLORS) {
+      const el = document.getElementById(legendId); if (!el) return;
+      el.innerHTML = labels.map((lab, i) => `
+        <div class="legend-item">
+          <span class="legend-swatch" style="background:${colors[i % colors.length]}"></span>
+          <span>${lab}</span>
+        </div>
+      `).join('');
+    }
+
     // 简易图表占位渲染
     function drawLine(canvasId, points=[]) {
       const el = document.getElementById(canvasId); if (!el) return;
@@ -208,20 +242,24 @@
       points = points.length? points : Array.from({length:24}, (_,i)=> Math.sin(i/3)*0.4 + 0.5 + Math.random()*0.2);
       points.forEach((p,i)=>{ const x = i*(w/(points.length-1)); const y = h - p*h; i? ctx.lineTo(x,y): ctx.moveTo(x,y); }); ctx.stroke();
     }
-    function drawPie(canvasId, values=[40,30,20,10]) {
+    function drawPie(canvasId, values=[40,30,20,10,5]) {
       const el = document.getElementById(canvasId); if (!el) return; const ctx = el.getContext('2d'); const r = Math.min(el.width, el.height)/2 - 6; const cx = el.width/2, cy = el.height/2;
-      const colors = ['#1f6feb','#22c55e','#f59e0b','#ef4444']; const total = values.reduce((a,b)=>a+b,0); let start=0;
+      const colors = PIE_COLORS; const total = values.reduce((a,b)=>a+b,0); let start=0;
       values.forEach((v,i)=>{ const ang = (v/total)*Math.PI*2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,start+ang); ctx.closePath(); ctx.fillStyle=colors[i%colors.length]; ctx.fill(); start+=ang; });
-      ctx.beginPath(); ctx.arc(cx,cy,r*0.55,0,Math.PI*2); ctx.fillStyle = '#0b1220'; ctx.fill();
+      // 中心镂空颜色与卡片背景一致，避免出现与页面背景的色差
+      const cardColor = getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#111b33';
+      ctx.beginPath(); ctx.arc(cx,cy,r*0.55,0,Math.PI*2); ctx.fillStyle = cardColor; ctx.fill();
     }
     function drawBars(containerId, values=[20,45,30,25,35,40]) {
       const el = document.getElementById(containerId); if (!el) return; el.innerHTML=''; const max = Math.max(...values);
       values.forEach(v=>{ const d=document.createElement('div'); d.style.height = (v/max*100)+'%'; el.appendChild(d); });
     }
 
-    // 初始渲染占位
+    // 初始渲染占位（将由真实数据覆盖）
     drawLine('lineLeft'); drawLine('lineRight1'); drawLine('lineRight2');
     drawPie('pieLeft'); drawPie('pieRight');
+    renderLegend('legendLeft', PIE_LABELS, PIE_COLORS);
+    renderLegend('legendRight', PIE_LABELS, PIE_COLORS);
     drawBars('barLeft');
 
     // 上传交互
@@ -259,13 +297,62 @@
             clearInterval(pollTimer);
             const r = await (await fetch('/api/jobs/' + jobId + '/result')).json();
             if (r.processed_video) { resultVideo.src = r.processed_video; }
-            const stats = r.behavior_stats || {}; const abnormal = (stats['Raising Hand']||0) + (stats['Standing']||0) + (stats['Passing Objects']||0) + (stats['Turning Around']||0) + (stats['Sleeping']||0) + (stats['Looking Down']||0);
-            stDown.textContent = (stats['Looking Down']||0); stSleep.textContent = (stats['Sleeping']||0); stRaise.textContent = (stats['Raising Hand']||0);
-            const list = r.attendance || []; const present = list.filter(i => i.status === 'Present').length; statAttend.textContent = present; ovAttend.textContent = present; ovAbn.textContent = abnormal;
+            const stats = r.behavior_stats || {};
+            const abnormal = (stats['Raising Hand']||0) + (stats['Standing']||0) + (stats['Passing Objects']||0) + (stats['Turning Around']||0) + (stats['Sleeping']||0) + (stats['Looking Down']||0);
+            // 实数据填充：课堂状态统计（全班维度）
+            const attention = (stats['Normal Listening']||0);
+            const engagement = (stats['Raising Hand']||0);
+            const distractions = (stats['Looking Down']||0) + (stats['Turning Around']||0);
+            const discipline = (stats['Passing Objects']||0) + (stats['Standing']||0);
+            const sleep = (stats['Sleeping']||0);
+            const total = attention + engagement + distractions + discipline + sleep;
+
+            // 更新底部课堂状态面板
+            stDown.textContent = (stats['Looking Down']||0);
+            stSleep.textContent = (stats['Sleeping']||0);
+            stRaise.textContent = (stats['Raising Hand']||0);
+
+            // 签到与人数
+            const list = r.attendance || [];
+            const present = list.filter(i => i.status === 'Present').length;
+            statAttend.textContent = present;
+            ovAttend.textContent = present;
+            ovAbn.textContent = abnormal;
             attendanceBody.innerHTML = list.map(i => `<tr><td>${i.name}</td><td>${i.status}</td></tr>`).join('');
-            const absent = list.filter(i => i.status !== 'Present'); absentCount.textContent = absent.length + '人';
+            const absent = list.filter(i => i.status !== 'Present');
+            absentCount.textContent = absent.length + '人';
             absentBody.innerHTML = absent.map((i,idx)=> `<tr><td>${20230000+idx}</td><td>${i.name}</td><td>${i.status}</td></tr>`).join('');
             ovCourse.textContent = document.getElementById('courseName').value || '—'; ovTeacher.textContent = '—';
+
+            // 课堂指数（0-10）基于真实行为数据
+            let idx = total ? ((attention + engagement) - (distractions + discipline + sleep)) / total : 0;
+            idx = Math.max(0, Math.min(1, idx));
+            document.getElementById('statIndex').textContent = (idx * 10).toFixed(1);
+            // 当节教学指数：注意力与互动加权，纪律与睡眠扣分
+            const teachScore = Math.max(0, Math.round((attention * 1.0 + engagement * 2.0 - discipline * 1.5 - sleep * 2.0) * 10));
+            document.getElementById('statTeach').textContent = String(teachScore);
+
+            // 图表：课堂维度综合评价（饼图）
+            const dimValues = [attention, engagement, distractions, discipline, sleep];
+            drawPie('pieLeft', dimValues);
+            drawPie('pieRight', dimValues);
+            renderLegend('legendLeft', PIE_LABELS, PIE_COLORS);
+            renderLegend('legendRight', PIE_LABELS, PIE_COLORS);
+
+            // 不良课堂状态分布（柱状图）：分心、纪律问题、睡眠
+            const barVals = [distractions, discipline, sleep];
+            drawBars('barLeft', barVals);
+
+            // 趋势线：基于真实分布构建稳定序列用于展示
+            const base = total ? dimValues.map(v => v/total) : [0.5,0.5,0.5,0.5,0.5];
+            const mkSeries = (arr,len=24) => Array.from({length:len}, (_,i)=> arr[i % arr.length]);
+            drawLine('lineLeft', mkSeries(base));
+            const attRatio = present / (list.length || 1);
+            // 课堂质量趋势：采用课堂指数（0-1）
+            drawLine('lineRight1', mkSeries([idx]));
+            const teachRatio = total ? Math.max(0, (attention + engagement) / total) : 0.5;
+            drawLine('lineRight2', mkSeries([teachRatio]));
+
             uploadBtn.disabled = false;
           }
         } catch (e) { /* 忽略短暂轮询错误 */ }
