@@ -25,7 +25,16 @@ except Exception:
 try:
     from face_recognition.video_face_recognition import VideoFaceRecognition
 except Exception:
-    VideoFaceRecognition = None
+    # 回退：直接将 face_recognition 目录加入 sys.path 并按脚本名导入
+    try:
+        import sys, importlib
+        fr_dir = Path(settings.PROJECT_ROOT) / 'face_recognition'
+        if str(fr_dir) not in sys.path:
+            sys.path.insert(0, str(fr_dir))
+        video_face_recognition_mod = importlib.import_module('video_face_recognition')
+        VideoFaceRecognition = getattr(video_face_recognition_mod, 'VideoFaceRecognition', None)
+    except Exception:
+        VideoFaceRecognition = None
 
 
 storage = Storage(Path(settings.BASE_DIR) / 'data')
@@ -90,19 +99,62 @@ def start_processing_job(job_id: str, video_path: Path, students: list):
             })
 
             def transcode_to_h264(src: Path, dst: Path):
-                """使用FFmpeg转码到浏览器友好的H.264/AAC MP4"""
+                """使用FFmpeg转码到浏览器友好的H.264/AAC MP4，确保尺寸为偶数、快速启动、音视频兼容（Baseline+CFR）"""
                 try:
-                    # -pix_fmt yuv420p 保证兼容，+faststart 适合网页流式播放
+                    # 关键点：
+                    # -pix_fmt yuv420p 保证兼容；Baseline@3.1 对旧设备更友好
+                    # scale=trunc(iw/2)*2:trunc(ih/2)*2 保证宽高是偶数（H.264要求）
+                    # -r 30 强制 CFR，避免可变帧率造成播放问题
+                    # -movflags +faststart 将 moov 移到文件前，提高网页首帧时间
+                    # -map 选择第一路音视频，音频可选（若原视频无音轨也能成功）
+                    # -vsync cfr 输出恒定帧率
                     cmd = [
                         'ffmpeg', '-y', '-i', str(src),
+                        '-map', '0:v:0', '-map', '0:a:0?',
                         '-c:v', 'libx264', '-preset', 'veryfast',
-                        '-profile:v', 'baseline', '-level', '3.0',
-                        '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
-                        '-c:a', 'aac', '-b:a', '128k', str(dst)
+                        '-profile:v', 'baseline', '-level', '3.1',
+                        '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+                        '-pix_fmt', 'yuv420p',
+                        '-r', '30',
+                        '-x264-params', 'keyint=60:min-keyint=60:no-scenecut=1',
+                        '-vsync', 'cfr',
+                        '-movflags', '+faststart',
+                        '-tag:v', 'avc1',
+                        '-c:a', 'aac', '-b:a', '128k', '-ac', '2', '-ar', '48000',
+                        str(dst)
                     ]
                     subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                except subprocess.CalledProcessError as e:
+                    # 记录ffmpeg错误并回退复制原始文件
+                    try:
+                        err = (e.stderr or b'').decode('utf-8', errors='ignore')
+                        storage.set_job(job_id, {
+                            'status': 'processing', 'progress': 38,
+                            'message': f'转码失败，保留原视频：{e}\n{err[:500]}'
+                        })
+                    except Exception:
+                        pass
+                    try:
+                        import shutil
+                        shutil.copyfile(str(src), str(dst))
+                    except Exception:
+                        pass
+                except FileNotFoundError as e:
+                    # 未安装或未配置 FFmpeg：记录提示并复制原视频
+                    try:
+                        storage.set_job(job_id, {
+                            'status': 'processing', 'progress': 36,
+                            'message': '未检测到 FFmpeg，可执行文件未找到，已复制原视频（原编码可能不兼容浏览器）'
+                        })
+                    except Exception:
+                        pass
+                    try:
+                        import shutil
+                        shutil.copyfile(str(src), str(dst))
+                    except Exception:
+                        pass
                 except Exception:
-                    # 如果ffmpeg不可用或失败，保留原始文件以避免任务失败
+                    # 如果ffmpeg不可用或其他失败，保留原始文件以避免任务失败
                     try:
                         import shutil
                         shutil.copyfile(str(src), str(dst))
@@ -187,7 +239,7 @@ def start_processing_job(job_id: str, video_path: Path, students: list):
                 'status': 'processing', 'progress': 60, 'message': '进行人脸识别签到...'
             })
 
-            # 人脸识别与签到（若模型缺失则返回未知）
+            # 人脸识别与签到：从视频中实际识别已注册人员
             recognized_names = set()
             try:
                 if VideoFaceRecognition is None:
@@ -195,30 +247,67 @@ def start_processing_job(job_id: str, video_path: Path, students: list):
                 face_recog = VideoFaceRecognition(
                     arcface_model_path=str(Path(settings.PROJECT_ROOT) / 'face_recognition' / 'weight' / 'arcface_iresnet50.onnx'),
                     database_path=str(Path(settings.PROJECT_ROOT) / 'face_recognition' / 'face_database'),
-                    recognition_threshold=0.6
+                    recognition_threshold=0.4
                 )
-                # 运行但不生成视频，仅统计（为了简化）
-                # 可扩展：face_recog.run_video(str(video_path), None)
-                # 这里模拟结果：读取数据库元数据，对课程名单进行匹配
-                import json
-                meta_path = Path('face_recognition') / 'face_database' / 'metadata.json'
-                if meta_path.exists():
-                    meta = json.loads(meta_path.read_text(encoding='utf-8'))
-                    for pid, info in meta.items():
-                        recognized_names.add(info.get('name'))
-            except Exception:
-                pass
+                import cv2
+                cap = cv2.VideoCapture(str(video_path))
+                if cap.isOpened():
+                    fps = cap.get(cv2.CAP_PROP_FPS) or 25
+                    max_seconds = 15
+                    max_frames = int(fps * max_seconds)
+                    frame_idx = 0
+                    detected_faces_total = 0
+                    recognized_faces_total = 0
+                    max_similarity_observed = 0.0
+                    while frame_idx < max_frames:
+                        ret, frame = cap.read()
+                        if not ret:
+                            break
+                        # 每帧识别，尽量提高召回率
+                        results = face_recog.process_frame(frame)
+                        detected_faces_total += len(results)
+                        recognized_faces_total += sum(1 for r in results if r.get('recognized'))
+                        for r in results:
+                            sim = float(r.get('similarity') or 0.0)
+                            if sim > max_similarity_observed:
+                                max_similarity_observed = sim
+                            if r.get('recognized') and r.get('person_name'):
+                                recognized_names.add(str(r['person_name']).strip())
+                        # 若已全部识别到课程名单中的人员，则提前结束
+                        if recognized_names and students:
+                            if all(((stu.get('name') if isinstance(stu, dict) else str(stu)).strip() in recognized_names) for stu in students):
+                                break
+                        frame_idx += 1
+                    cap.release()
+                else:
+                    storage.set_job(job_id, {
+                        'status': 'processing', 'progress': 62,
+                        'message': '人脸识别：无法打开视频，跳过签到统计'
+                    })
+            except Exception as e:
+                storage.set_job(job_id, {
+                    'status': 'processing', 'progress': 62,
+                    'message': f'人脸识别失败：{e}'
+                })
 
+            # 统一名字格式，避免空格/大小写差异导致匹配失败
+            normalized_recognized = {str(n).strip() for n in recognized_names}
             for stu in students:
-                name = (stu.get('name') if isinstance(stu, dict) else str(stu)).strip()
+                name = (stu.get('name') if isinstance(stu, dict) else str(stu))
+                name = str(name).strip()
                 attendance.append({
                     'name': name,
-                    'status': 'Present' if name in recognized_names else 'Unknown'
+                    'status': 'Present' if name in normalized_recognized else 'Unknown'
                 })
 
             final_msg = f'处理完成（{pipeline_mode}）'
             if pipeline_mode != 'realtime' and last_error_text:
                 final_msg += f'：{last_error_text}'
+            # 附加识别统计，便于排查为何显示 Unknown
+            try:
+                final_msg += f"；人脸检测/识别统计：检测到 {detected_faces_total} 张人脸，识别成功 {recognized_faces_total} 张，最高相似度 {max_similarity_observed:.2f}；识别到：{', '.join(sorted(normalized_recognized)) or '无'}"
+            except Exception:
+                pass
             storage.set_job(job_id, {
                 'status': 'completed',
                 'progress': 100,
