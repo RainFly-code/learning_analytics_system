@@ -704,5 +704,49 @@
       ],
       "pipeline": "realtime"
     }
+  },
+  "25050db5d98d4662854af754cbcba059": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/25050db5d98d4662854af754cbcba059.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "周雨飞",
+          "status": "Unknown"
+        },
+        {
+          "name": "waz",
+          "status": "Unknown"
+        },
+        {
+          "name": "wdf",
+          "status": "Unknown"
+        },
+        {
+          "name": "dgw",
+          "status": "Unknown"
+        },
+        {
+          "name": "fdf",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
   }
 }

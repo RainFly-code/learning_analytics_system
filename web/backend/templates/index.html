@@ -30,12 +30,17 @@
     .video .overlay { position:absolute; left:12px; top:12px; background:#0c1528cc; border:1px dashed #294064; padding:8px; border-radius:8px; font-size:12px; }
     .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .grid-3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
-    .line { height:160px; background:var(--card); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; }
+    .line { height:200px; background:var(--card); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; }
     .line canvas { position:absolute; inset:0; }
-    .pie { height:200px; display:flex; align-items:center; justify-content:center; }
+    .pie { height:265px; display:flex; align-items:center; justify-content:center; }
     .legend { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; color:var(--muted); font-size:12px; }
     .legend-item { display:flex; align-items:center; gap:6px; }
     .legend-swatch { width:10px; height:10px; border-radius:2px; border:1px solid var(--border); }
+    .gauge { height:200px; display:flex; align-items:center; justify-content:center; }
+    .overview-metrics { display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:8px; }
+    .overview-metrics .stat .val { font-size:18px; }
+    .bar-dist { height:190px; display:grid; grid-auto-flow:column; align-items:end; gap:6px; }
+    .bar-dist div { background:#334155; border:1px solid var(--border); border-radius:4px; display:flex; align-items:flex-end; justify-content:center; color:#9fb2d9; font-size:10px; }
     /* 顶部容器两张卡片各占一行，图表填满卡片 */
     .col-top .card { display:flex; flex-direction:column; }
     .col-top .line { height:100%; }
@@ -73,38 +78,34 @@
   <div class="wrap">
     <!-- 左侧列 -->
     <div class="col col-left">
-      <!-- 顶部：与右侧保持一致的两张图表，无滚动且与视频下沿对齐 -->
-      <div class="col-top">
-        <div class="card">
-          <div class="title">当前课堂状态分析</div>
-          <div class="line"><canvas id="lineLeft"></canvas></div>
+      <div class="card">
+        <div class="title">课堂总体概览</div>
+        <div class="overview-metrics">
+          <div class="stat"><div class="muted">出勤率</div><div id="ovAttendRate" class="val">0%</div></div>
+          <div class="stat"><div class="muted">专注度指数</div><div id="ovAttention" class="val">0.0</div></div>
+          <div class="stat"><div class="muted">不良行为比例</div><div id="ovBadRatio" class="val">0%</div></div>
+          <div class="stat"><div class="muted">举手次数</div><div id="ovRaiseCount" class="val">0</div></div>
         </div>
-        <div class="card">
-          <div class="title">课堂维度综合评价（全班）</div>
-          <div class="pie"><canvas id="pieLeft" width="180" height="180"></canvas></div>
-          <div class="legend" id="legendLeft"></div>
-        </div>
-      </div>
-      <!-- 底部：其余信息，避免挤占顶部高度 -->
-      <div class="card push-bottom">
-        <div class="title">未出勤人员 <span id="absentCount" class="muted">0人</span></div>
-        <table>
-          <thead><tr><th>学号</th><th>姓名</th><th>状态</th></tr></thead>
-          <tbody id="absentBody"></tbody>
-        </table>
       </div>
       <div class="card">
-        <div class="title">不良课堂状态分布</div>
-        <div class="bar" id="barLeft"></div>
+        <div class="title">行为分布与统计</div>
+        <div class="bar-dist" id="distBars"></div>
+      </div>
+      <div class="card">
+        <div class="title">行为趋势分析</div>
+        <div class="line"><canvas id="stackedArea"></canvas></div>
       </div>
     </div>
 
     <!-- 中间列 -->
     <div class="col col-center">
-      <div class="stat-row">
-        <div class="stat"><div class="muted">当前课堂指数</div><div id="statIndex" class="val">0.0</div></div>
-        <div class="stat"><div class="muted">当节教学指数</div><div id="statTeach" class="val">0</div></div>
-        <div class="stat"><div class="muted">当前到课人数</div><div id="statAttend" class="val">0</div></div>
+      <div class="card">
+        <div class="title">课程信息</div>
+        <div class="grid-3">
+          <div class="stat"><div class="muted">课程名称</div><div id="infoCourse" class="val">—</div></div>
+          <div class="stat"><div class="muted">课程简介</div><div id="infoDesc" class="val">—</div></div>
+          <div class="stat"><div class="muted">总人数</div><div id="infoTotal" class="val">0</div></div>
+        </div>
       </div>
       <div class="card video">
         <div class="title">课堂监控画面</div>
@@ -118,47 +119,47 @@
       </div>
       <div class="grid-3 footer">
         <div class="card">
-          <div class="title">课堂状态</div>
-          <div class="grid-3">
-            <div class="stat"><div class="muted">低头</div><div id="stDown" class="val">0</div></div>
-            <div class="stat"><div class="muted">睡觉</div><div id="stSleep" class="val">0</div></div>
-            <div class="stat"><div class="muted">举手</div><div id="stRaise" class="val">0</div></div>
+          <div class="title">未出勤人员 <span id="absentCount" class="muted">0人</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>学号</th><th>姓名</th><th>状态</th></tr></thead>
+              <tbody id="absentBody"></tbody>
+            </table>
           </div>
         </div>
         <div class="card">
           <div class="title">签到表</div>
-          <table>
-            <thead><tr><th>姓名</th><th>状态</th></tr></thead>
-            <tbody id="attendanceBody"></tbody>
-          </table>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>姓名</th><th>状态</th></tr></thead>
+              <tbody id="attendanceBody"></tbody>
+            </table>
+          </div>
         </div>
         <div class="card">
-          <div class="title">状态抓拍</div>
-          <div class="grid-3" id="snapshots">
-            <div class="stat"><div class="muted">占位</div><div class="val">—</div></div>
-            <div class="stat"><div class="muted">占位</div><div class="val">—</div></div>
-            <div class="stat"><div class="muted">占位</div><div class="val">—</div></div>
-          </div>
+          <div class="title">检测状态信息</div>
+          <div id="detectStatus" class="val" style="font-size:18px;">未开始</div>
         </div>
       </div>
     </div>
 
-    <!-- 右侧列 -->
+    <!-- 右侧列：三部分 -->
     <div class="col col-right">
-      <div class="col-top">
-        <div class="card">
-          <div class="title">课堂质量趋势</div>
-          <div class="line"><canvas id="lineRight1"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="title">学生课堂统计</div>
-          <div class="pie"><canvas id="pieRight" width="180" height="180"></canvas></div>
-          <div class="legend" id="legendRight"></div>
-        </div>
+      <div class="card">
+        <div class="title">课堂互动分析</div>
+        <div class="line"><canvas id="interactionLine"></canvas></div>
       </div>
-      <div class="card push-bottom">
-        <div class="title">上课次数变化统计</div>
-        <div class="line" id="lineRight2Wrap"><canvas id="lineRight2"></canvas></div>
+      <div class="card">
+        <div class="title">课堂纪律分析</div>
+        <div class="pie"><canvas id="disciplinePie" width="180" height="180"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="title">课堂建议</div>
+        <ul id="suggestions" class="muted" style="margin:0; padding-left:18px;">
+          <li>增加互动环节提升专注度</li>
+          <li>对高发不良行为时段进行课堂管理</li>
+          <li>优化课堂节奏，减少走神</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -203,10 +204,17 @@
     const ovTeacher = document.getElementById('ovTeacher');
     const ovAttend = document.getElementById('ovAttend');
     const ovAbn = document.getElementById('ovAbn');
-    const statAttend = document.getElementById('statAttend');
+    const infoCourse = document.getElementById('infoCourse');
+    const infoDesc = document.getElementById('infoDesc');
+    const infoTotal = document.getElementById('infoTotal');
+    const ovAttendRate = document.getElementById('ovAttendRate');
+    const ovAttention = document.getElementById('ovAttention');
+    const ovBadRatio = document.getElementById('ovBadRatio');
+    const ovRaiseCount = document.getElementById('ovRaiseCount');
     const stDown = document.getElementById('stDown');
     const stSleep = document.getElementById('stSleep');
     const stRaise = document.getElementById('stRaise');
+    const detectStatusEl = document.getElementById('detectStatus');
     const attendanceBody = document.getElementById('attendanceBody');
     const absentBody = document.getElementById('absentBody');
     const absentCount = document.getElementById('absentCount');
@@ -220,19 +228,11 @@
 
     let pollTimer = null;
 
-    // 饼图颜色与标签（统一 5 类）
-    const PIE_COLORS = ['#1f6feb','#22c55e','#f59e0b','#ef4444','#8b5cf6'];
-    const PIE_LABELS = ['注意力','互动','分心','纪律','睡眠'];
-
-    function renderLegend(legendId, labels=PIE_LABELS, colors=PIE_COLORS) {
-      const el = document.getElementById(legendId); if (!el) return;
-      el.innerHTML = labels.map((lab, i) => `
-        <div class="legend-item">
-          <span class="legend-swatch" style="background:${colors[i % colors.length]}"></span>
-          <span>${lab}</span>
-        </div>
-      `).join('');
-    }
+    // 颜色与标签（7 类行为）
+    const CAT_COLORS = ['#1f6feb','#22c55e','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#94a3b8'];
+    const CAT_CN = ['注意听讲','低头','东张西望','传递物品','睡觉','举手','站立'];
+    const DIST_KEYS = ['normal','raise','down','turn','sleep'];
+    const DIST_LABELS = ['注意听讲','举手','低头','东张西望','睡觉'];
 
     // 简易图表占位渲染
     function drawLine(canvasId, points=[]) {
@@ -244,23 +244,62 @@
     }
     function drawPie(canvasId, values=[40,30,20,10,5]) {
       const el = document.getElementById(canvasId); if (!el) return; const ctx = el.getContext('2d'); const r = Math.min(el.width, el.height)/2 - 6; const cx = el.width/2, cy = el.height/2;
-      const colors = PIE_COLORS; const total = values.reduce((a,b)=>a+b,0); let start=0;
+      const colors = CAT_COLORS; const total = values.reduce((a,b)=>a+b,0); let start=0;
       values.forEach((v,i)=>{ const ang = (v/total)*Math.PI*2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,start+ang); ctx.closePath(); ctx.fillStyle=colors[i%colors.length]; ctx.fill(); start+=ang; });
       // 中心镂空颜色与卡片背景一致，避免出现与页面背景的色差
       const cardColor = getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#111b33';
       ctx.beginPath(); ctx.arc(cx,cy,r*0.55,0,Math.PI*2); ctx.fillStyle = cardColor; ctx.fill();
     }
-    function drawBars(containerId, values=[20,45,30,25,35,40]) {
-      const el = document.getElementById(containerId); if (!el) return; el.innerHTML=''; const max = Math.max(...values);
-      values.forEach(v=>{ const d=document.createElement('div'); d.style.height = (v/max*100)+'%'; el.appendChild(d); });
+    function drawBars(containerId, values=[20,45,30,25,35], labels=CAT_CN) {
+      const el = document.getElementById(containerId); if (!el) return; el.innerHTML=''; const max = Math.max(...values, 1);
+      values.forEach((v,i)=>{ const d=document.createElement('div'); d.style.height = (v/max*100)+'%'; d.style.color = '#9fb2d9'; d.title = labels[i] + ': ' + v; d.textContent = labels[i]; el.appendChild(d); });
+    }
+
+    function drawGauge(canvasId, ratio=0.5) {
+      const el = document.getElementById(canvasId); if (!el) return; const ctx = el.getContext('2d'); const w = el.width = el.parentElement.clientWidth; const h = el.height = el.parentElement.clientHeight;
+      ctx.clearRect(0,0,w,h);
+      const r = Math.min(w,h)/2 - 12; const cx = w/2, cy = h*0.9; // 半圆仪表
+      ctx.lineWidth = 10; ctx.strokeStyle = '#294064'; ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,0); ctx.stroke();
+      // 进度
+      const ang = Math.PI * ratio; ctx.strokeStyle = '#1f6feb'; ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI, Math.PI - ang); ctx.stroke();
+      // 指针
+      const nx = cx + r * Math.cos(Math.PI - ang); const ny = cy + r * Math.sin(Math.PI - ang);
+      ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(nx,ny); ctx.stroke();
+      // 文本
+      ctx.fillStyle = '#e8eef9'; ctx.font = 'bold 16px Inter, Arial'; ctx.textAlign = 'center';
+      ctx.fillText((ratio*100).toFixed(0) + '%', cx, cy- r - 6);
+    }
+
+    function drawStackedArea(canvasId, seriesMatrix=[[0.5]], colors=CAT_COLORS) {
+      const el = document.getElementById(canvasId); if (!el) return; const ctx = el.getContext('2d'); const w = el.width = el.parentElement.clientWidth; const h = el.height = el.parentElement.clientHeight;
+      ctx.clearRect(0,0,w,h);
+      const n = seriesMatrix.length; const len = seriesMatrix[0]?.length || 0;
+      const xStep = len>1? w/(len-1): w;
+      let cumPrev = new Array(len).fill(0);
+      for (let s=0; s<n; s++) {
+        const series = seriesMatrix[s]; ctx.fillStyle = colors[s % colors.length]; ctx.globalAlpha = 0.35;
+        ctx.beginPath();
+        for (let i=0;i<len;i++) {
+          const x = i * xStep; const y = h - (cumPrev[i] + series[i]) * h;
+          i===0? ctx.moveTo(x,y): ctx.lineTo(x,y);
+        }
+        for (let i=len-1;i>=0;i--) {
+          const x = i * xStep; const y = h - cumPrev[i] * h;
+          ctx.lineTo(x,y);
+        }
+        ctx.closePath(); ctx.fill();
+        // 更新累计
+        for (let i=0;i<len;i++) cumPrev[i] += series[i];
+      }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = '#294064'; ctx.strokeRect(0,0,w,h);
     }
 
     // 初始渲染占位（将由真实数据覆盖）
-    drawLine('lineLeft'); drawLine('lineRight1'); drawLine('lineRight2');
-    drawPie('pieLeft'); drawPie('pieRight');
-    renderLegend('legendLeft', PIE_LABELS, PIE_COLORS);
-    renderLegend('legendRight', PIE_LABELS, PIE_COLORS);
-    drawBars('barLeft');
+    drawBars('distBars', [20,35,18,12,10], DIST_LABELS);
+    drawStackedArea('stackedArea', [[0.5,0.6,0.55,0.58,0.62]]);
+    drawLine('interactionLine', Array.from({length:24}, (_,i)=> 0.4 + Math.sin(i/6)*0.1));
+    drawPie('disciplinePie', [30,20,10,15]);
 
     // 上传交互
     fabUpload.onclick = () => { modalUpload.style.display = 'flex'; };
@@ -293,29 +332,33 @@
       pollTimer = setInterval(async () => {
         try {
           const s = await (await fetch('/api/jobs/' + jobId + '/status')).json(); setProgress(s.progress || 0, s.message || '');
+          if (detectStatusEl) {
+            detectStatusEl.textContent = s.status === 'completed' ? '分析成功' : (s.status === 'error' ? '分析失败' : '处理中');
+          }
           if (s.status === 'completed' || s.status === 'error') {
             clearInterval(pollTimer);
             const r = await (await fetch('/api/jobs/' + jobId + '/result')).json();
             if (r.processed_video) { resultVideo.src = r.processed_video; }
             const stats = r.behavior_stats || {};
-            const abnormal = (stats['Raising Hand']||0) + (stats['Standing']||0) + (stats['Passing Objects']||0) + (stats['Turning Around']||0) + (stats['Sleeping']||0) + (stats['Looking Down']||0);
-            // 实数据填充：课堂状态统计（全班维度）
-            const attention = (stats['Normal Listening']||0);
-            const engagement = (stats['Raising Hand']||0);
-            const distractions = (stats['Looking Down']||0) + (stats['Turning Around']||0);
-            const discipline = (stats['Passing Objects']||0) + (stats['Standing']||0);
-            const sleep = (stats['Sleeping']||0);
-            const total = attention + engagement + distractions + discipline + sleep;
-
-            // 更新底部课堂状态面板
-            stDown.textContent = (stats['Looking Down']||0);
-            stSleep.textContent = (stats['Sleeping']||0);
-            stRaise.textContent = (stats['Raising Hand']||0);
+            const counts = {
+              normal: (stats['Normal Listening']||0),
+              down: (stats['Looking Down']||0),
+              turn: (stats['Turning Around']||0),
+              pass: (stats['Passing Objects']||0),
+              sleep: (stats['Sleeping']||0),
+              raise: (stats['Raising Hand']||0),
+              stand: (stats['Standing']||0)
+            };
+            const totalFrames = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
+            const abnormal = counts.raise + counts.stand + counts.pass + counts.turn + counts.sleep + counts.down;
+            // 更新检测状态信息
+            stDown.textContent = counts.down;
+            stSleep.textContent = counts.sleep;
+            stRaise.textContent = counts.raise;
 
             // 签到与人数
             const list = r.attendance || [];
             const present = list.filter(i => i.status === 'Present').length;
-            statAttend.textContent = present;
             ovAttend.textContent = present;
             ovAbn.textContent = abnormal;
             attendanceBody.innerHTML = list.map(i => `<tr><td>${i.name}</td><td>${i.status}</td></tr>`).join('');
@@ -323,35 +366,46 @@
             absentCount.textContent = absent.length + '人';
             absentBody.innerHTML = absent.map((i,idx)=> `<tr><td>${20230000+idx}</td><td>${i.name}</td><td>${i.status}</td></tr>`).join('');
             ovCourse.textContent = document.getElementById('courseName').value || '—'; ovTeacher.textContent = '—';
+            infoCourse.textContent = ovCourse.textContent;
+            infoDesc.textContent = document.getElementById('courseDesc').value || '—';
+            infoTotal.textContent = String(list.length || 0);
 
-            // 课堂指数（0-10）基于真实行为数据
-            let idx = total ? ((attention + engagement) - (distractions + discipline + sleep)) / total : 0;
-            idx = Math.max(0, Math.min(1, idx));
-            document.getElementById('statIndex').textContent = (idx * 10).toFixed(1);
-            // 当节教学指数：注意力与互动加权，纪律与睡眠扣分
-            const teachScore = Math.max(0, Math.round((attention * 1.0 + engagement * 2.0 - discipline * 1.5 - sleep * 2.0) * 10));
-            document.getElementById('statTeach').textContent = String(teachScore);
+            // 概览：出勤率、专注度、坏行为比例、举手次数
+            const attendRate = list.length ? present / list.length : 0;
+            ovAttendRate.textContent = (attendRate*100).toFixed(0) + '%';
+            const weights = { normal: 2, raise: 2, stand: 0, down: 0.5, turn: -1, pass: -2, sleep: -5 };
+            const attentionScoreRaw = (
+              counts.normal * weights.normal + counts.raise * weights.raise + counts.stand * weights.stand +
+              counts.down * weights.down + counts.turn * weights.turn + counts.pass * weights.pass + counts.sleep * weights.sleep
+            ) / totalFrames;
+            const attentionRatio = Math.max(0, Math.min(1, (attentionScoreRaw + 5) / 7)); // 映射到 0-1
+            ovAttention.textContent = (attentionRatio*100).toFixed(0) + '%';
+            const badRatio = Math.min(1, (counts.pass + counts.turn + counts.sleep) / totalFrames);
+            ovBadRatio.textContent = (badRatio*100).toFixed(0) + '%';
+            ovRaiseCount.textContent = String(counts.raise);
 
-            // 图表：课堂维度综合评价（饼图）
-            const dimValues = [attention, engagement, distractions, discipline, sleep];
-            drawPie('pieLeft', dimValues);
-            drawPie('pieRight', dimValues);
-            renderLegend('legendLeft', PIE_LABELS, PIE_COLORS);
-            renderLegend('legendRight', PIE_LABELS, PIE_COLORS);
+            // 行为分布：7 类柱状图
+            const distVals = DIST_KEYS.map(k => ({
+              normal: counts.normal,
+              raise: counts.raise,
+              down: counts.down,
+              turn: counts.turn,
+              sleep: counts.sleep
+            }[k]));
+            drawBars('distBars', distVals, DIST_LABELS);
 
-            // 不良课堂状态分布（柱状图）：分心、纪律问题、睡眠
-            const barVals = [distractions, discipline, sleep];
-            drawBars('barLeft', barVals);
-
-            // 趋势线：基于真实分布构建稳定序列用于展示
-            const base = total ? dimValues.map(v => v/total) : [0.5,0.5,0.5,0.5,0.5];
+            // 行为趋势分析：堆叠面积（按比例）
+            const baseRatios = distVals.map(v => v / (totalFrames || 1));
             const mkSeries = (arr,len=24) => Array.from({length:len}, (_,i)=> arr[i % arr.length]);
-            drawLine('lineLeft', mkSeries(base));
-            const attRatio = present / (list.length || 1);
-            // 课堂质量趋势：采用课堂指数（0-1）
-            drawLine('lineRight1', mkSeries([idx]));
-            const teachRatio = total ? Math.max(0, (attention + engagement) / total) : 0.5;
-            drawLine('lineRight2', mkSeries([teachRatio]));
+            const seriesMatrix = baseRatios.map(ratio => mkSeries([ratio]));
+            drawStackedArea('stackedArea', seriesMatrix, CAT_COLORS);
+
+            // 互动分析：举手+站立 比例折线
+            const interactRatio = Math.min(1, (counts.raise + counts.stand) / totalFrames);
+            drawLine('interactionLine', mkSeries([interactRatio]));
+
+            // 纪律分析：不良行为比例饼图（含看低头）
+            drawPie('disciplinePie', [counts.pass, counts.turn, counts.sleep, counts.down]);
 
             uploadBtn.disabled = false;
           }
