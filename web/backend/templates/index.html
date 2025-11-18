@@ -31,15 +31,16 @@
     .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .grid-3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
     .line { height:200px; background:var(--card); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; }
-    .line canvas { position:absolute; inset:0; }
-    .pie { height:265px; display:flex; align-items:center; justify-content:center; }
+    .line > div, .line canvas { position:absolute; inset:0; }
+    .pie { height:240px; display:flex; align-items:center; justify-content:center; position:relative; }
+    .pie > div, .pie canvas { position:absolute; inset:0; }
     .legend { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; color:var(--muted); font-size:12px; }
     .legend-item { display:flex; align-items:center; gap:6px; }
     .legend-swatch { width:10px; height:10px; border-radius:2px; border:1px solid var(--border); }
     .gauge { height:200px; display:flex; align-items:center; justify-content:center; }
     .overview-metrics { display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:8px; }
     .overview-metrics .stat .val { font-size:18px; }
-    .bar-dist { height:190px; display:grid; grid-auto-flow:column; align-items:end; gap:6px; }
+    .bar-dist { height:220px; display:block; position:relative; }
     .bar-dist div { background:#334155; border:1px solid var(--border); border-radius:4px; display:flex; align-items:flex-end; justify-content:center; color:#9fb2d9; font-size:10px; }
     /* 顶部容器两张卡片各占一行，图表填满卡片 */
     .col-top .card { display:flex; flex-direction:column; }
@@ -54,6 +55,11 @@
     .footer { margin-top:10px; }
     table { width:100%; border-collapse:collapse; font-size:12px; }
     th, td { border-bottom:1px solid var(--border); padding:6px; text-align:left; }
+    .table-wrap { height:180px; overflow:auto; }
+    /* 高度统一：趋势图、纪律饼图、底部三卡片 */
+    .col-left .line { height:280px; }
+    .col-right .pie { height:280px; }
+    .footer .card { height:170px; display:flex; flex-direction:column; }
     .muted { color:var(--muted); }
     .fab { position:fixed; right:20px; bottom:20px; background:var(--primary); color:#fff; border:none; border-radius:999px; padding:12px 16px; font-weight:700; cursor:pointer; box-shadow:0 6px 18px rgba(31,111,235,.3); }
     /* Modal 样式统一深色系并增加层次与动效 */
@@ -93,7 +99,7 @@
       </div>
       <div class="card">
         <div class="title">行为趋势分析</div>
-        <div class="line"><canvas id="stackedArea"></canvas></div>
+        <div class="line"><div id="stackedArea"></div></div>
       </div>
     </div>
 
@@ -147,11 +153,11 @@
     <div class="col col-right">
       <div class="card">
         <div class="title">课堂互动分析</div>
-        <div class="line"><canvas id="interactionLine"></canvas></div>
+        <div class="line"><div id="interactionLine"></div></div>
       </div>
       <div class="card">
         <div class="title">课堂纪律分析</div>
-        <div class="pie"><canvas id="disciplinePie" width="180" height="180"></canvas></div>
+        <div class="pie"><div id="disciplinePie"></div></div>
       </div>
       <div class="card">
         <div class="title">课堂建议</div>
@@ -196,7 +202,8 @@
       </div>
     </div>
   </div>
-
+  
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js" onerror="(function(){var s=document.createElement('script');s.src='https://unpkg.com/echarts@5/dist/echarts.min.js';document.head.appendChild(s);})();"></script>
   <script>
     // 元素引用
     const resultVideo = document.getElementById('resultVideo');
@@ -235,28 +242,107 @@
     const DIST_LABELS = ['注意听讲','举手','低头','东张西望','睡觉'];
 
     // 简易图表占位渲染
-    function drawLine(canvasId, points=[]) {
-      const el = document.getElementById(canvasId); if (!el) return;
-      const ctx = el.getContext('2d'); const w = el.width = el.parentElement.clientWidth; const h = el.height = el.parentElement.clientHeight;
-      ctx.clearRect(0,0,w,h); ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 2; ctx.beginPath();
+    function drawLine(canvasId, points=[], color='#1f6feb', showAxes=false) {
       points = points.length? points : Array.from({length:24}, (_,i)=> Math.sin(i/3)*0.4 + 0.5 + Math.random()*0.2);
-      points.forEach((p,i)=>{ const x = i*(w/(points.length-1)); const y = h - p*h; i? ctx.lineTo(x,y): ctx.moveTo(x,y); }); ctx.stroke();
+      const el = document.getElementById(canvasId); if (!el) return;
+      if (window.echarts) {
+        const chart = echarts.getInstanceByDom(el) || echarts.init(el);
+        const len = points.length;
+        chart.setOption({
+          grid: {left: 40, right: 10, top: 10, bottom: 24},
+          xAxis: {type: 'value', min: 0, max: 1, axisLine: {lineStyle:{color:'#294064'}}, axisLabel:{color:'#9fb2d9'}},
+          yAxis: {type: 'value', min: 0, max: 1, axisLine:{lineStyle:{color:'#294064'}}, axisLabel:{color:'#9fb2d9'}},
+          tooltip: {trigger: 'axis'},
+          series: [{type: 'line', data: points.map((v,i)=> [len>1? i/(len-1): 0, Number(v)]), smooth: true, areaStyle: {}, lineStyle:{color: color}, itemStyle:{color: color} }]
+        });
+        return;
+      }
+      el.innerHTML = '';
+      const canvas = document.createElement('canvas'); el.appendChild(canvas);
+      const ctx = canvas.getContext('2d'); const w = canvas.width = el.clientWidth; const h = canvas.height = el.clientHeight;
+      ctx.clearRect(0,0,w,h);
+      const m = showAxes ? {l:32,r:10,t:10,b:26} : {l:0,r:0,t:0,b:0};
+      const cw = Math.max(1, w - m.l - m.r); const ch = Math.max(1, h - m.t - m.b);
+      const len = points.length; const step = len>1? cw/(len-1): cw;
+      if (showAxes) {
+        ctx.strokeStyle = '#294064'; ctx.lineWidth = 1; ctx.beginPath();
+        ctx.moveTo(m.l, h - m.b); ctx.lineTo(w - m.r, h - m.b);
+        ctx.moveTo(m.l, m.t); ctx.lineTo(m.l, h - m.b);
+        ctx.stroke();
+        const yTicks = [0,0.25,0.5,0.75,1];
+        ctx.fillStyle = '#9fb2d9'; ctx.font = '12px Inter, Arial';
+        yTicks.forEach(t => {
+          const y = m.t + (1 - t) * ch;
+          ctx.strokeStyle = '#23375d'; ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(w - m.r, y); ctx.stroke();
+          ctx.fillText(String(t), m.l - 26, y + 4);
+        });
+        for (let i=0;i<len;i++) {
+          const x = m.l + i * step;
+          ctx.strokeStyle = '#23375d'; ctx.beginPath(); ctx.moveTo(x, h - m.b); ctx.lineTo(x, h - m.b - 4); ctx.stroke();
+          if (i===0 || i===len-1 || i%4===0) { const t = len>1? (i/(len-1)).toFixed(2): '0.00'; ctx.fillText(t, x - 12, h - m.b + 14); }
+        }
+      }
+      ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
+      for (let i=0;i<len;i++) {
+        const x = m.l + i * step; const y = m.t + (1 - points[i]) * ch;
+        i? ctx.lineTo(x,y): ctx.moveTo(x,y);
+      }
+      ctx.stroke();
     }
-    function drawPie(canvasId, values=[40,30,20,10,5]) {
-      const el = document.getElementById(canvasId); if (!el) return; const ctx = el.getContext('2d'); const r = Math.min(el.width, el.height)/2 - 6; const cx = el.width/2, cy = el.height/2;
-      const colors = CAT_COLORS; const total = values.reduce((a,b)=>a+b,0); let start=0;
+    function drawPie(canvasId, values=[40,30,20,10,5], colorsOverride=null) {
+      const colors = colorsOverride || CAT_COLORS;
+      const el = document.getElementById(canvasId); if (!el) return;
+      if (window.echarts) {
+        const chart = echarts.getInstanceByDom(el) || echarts.init(el);
+        chart.setOption({
+          tooltip: {trigger: 'item'},
+          legend: {bottom: 0, textStyle:{color:'#9fb2d9'}},
+          color: colors,
+          series: [{type: 'pie', radius: ['35%','60%'], label: {show:false}, labelLine: {show:false}, data: ['传递物品','东张西望','睡觉','低头'].map((n,i)=>({name:n, value: values[i]||0})) }]
+        });
+        return;
+      }
+      el.innerHTML = '';
+      const canvas = document.createElement('canvas'); el.appendChild(canvas);
+      const ctx = canvas.getContext('2d'); const r = Math.min(canvas.width, canvas.height)/2 - 6; const cx = canvas.width/2, cy = canvas.height/2;
+      const total = values.reduce((a,b)=>a+b,0); let start=0;
       values.forEach((v,i)=>{ const ang = (v/total)*Math.PI*2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,start+ang); ctx.closePath(); ctx.fillStyle=colors[i%colors.length]; ctx.fill(); start+=ang; });
-      // 中心镂空颜色与卡片背景一致，避免出现与页面背景的色差
       const cardColor = getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#111b33';
       ctx.beginPath(); ctx.arc(cx,cy,r*0.55,0,Math.PI*2); ctx.fillStyle = cardColor; ctx.fill();
     }
+    function renderLegendDiscipline() {
+      const el = document.getElementById('disciplineLegend'); if (!el) return;
+      const labels = ['传递物品','东张西望','睡觉','低头'];
+      const colorIndexMap = [3,2,4,1];
+      el.innerHTML = '';
+      for (let i=0;i<labels.length;i++) {
+        const item = document.createElement('div'); item.className = 'legend-item';
+        const sw = document.createElement('div'); sw.className = 'legend-swatch'; sw.style.background = CAT_COLORS[colorIndexMap[i]];
+        const txt = document.createElement('span'); txt.textContent = labels[i];
+        item.appendChild(sw); item.appendChild(txt); el.appendChild(item);
+      }
+    }
+    function renderLegendTrend() {}
+    function renderLegendInteraction() {}
     function drawBars(containerId, values=[20,45,30,25,35], labels=CAT_CN) {
+      if (window.echarts) {
+        const el = document.getElementById(containerId); if (!el) return;
+        const chart = echarts.getInstanceByDom(el) || echarts.init(el);
+        chart.setOption({
+          grid: {left: 40, right: 10, top: 10, bottom: 24},
+          xAxis: {type: 'category', data: labels, axisLabel:{color:'#9fb2d9'}},
+          yAxis: {type: 'value', axisLabel:{color:'#9fb2d9'}},
+          tooltip: {trigger: 'axis'},
+          series: [{type: 'bar', data: values.map((v,i)=>({value:Number(v), itemStyle:{color: CAT_COLORS[[0,5,1,2,4][i]]}})) }]
+        });
+        return;
+      }
       const el = document.getElementById(containerId); if (!el) return; el.innerHTML=''; const max = Math.max(...values, 1);
       values.forEach((v,i)=>{ const d=document.createElement('div'); d.style.height = (v/max*100)+'%'; d.style.color = '#9fb2d9'; d.title = labels[i] + ': ' + v; d.textContent = labels[i]; el.appendChild(d); });
     }
 
     function drawGauge(canvasId, ratio=0.5) {
-      const el = document.getElementById(canvasId); if (!el) return; const ctx = el.getContext('2d'); const w = el.width = el.parentElement.clientWidth; const h = el.height = el.parentElement.clientHeight;
+      // draw axes and line on created canvas
       ctx.clearRect(0,0,w,h);
       const r = Math.min(w,h)/2 - 12; const cx = w/2, cy = h*0.9; // 半圆仪表
       ctx.lineWidth = 10; ctx.strokeStyle = '#294064'; ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,0); ctx.stroke();
@@ -271,7 +357,25 @@
     }
 
     function drawStackedArea(canvasId, seriesMatrix=[[0.5]], colors=CAT_COLORS) {
-      const el = document.getElementById(canvasId); if (!el) return; const ctx = el.getContext('2d'); const w = el.width = el.parentElement.clientWidth; const h = el.height = el.parentElement.clientHeight;
+      const el = document.getElementById(canvasId); if (!el) return;
+      if (window.echarts) {
+        const chart = echarts.getInstanceByDom(el) || echarts.init(el);
+        const len = seriesMatrix[0]?.length || 0;
+        const labels = ['注意听讲','举手','低头','东张西望','睡觉'];
+        chart.setOption({
+          grid: {left: 40, right: 10, top: 10, bottom: 24},
+          xAxis: {type: 'value', min: 0, max: 1, axisLabel:{color:'#9fb2d9'}},
+          yAxis: {type: 'value', min: 0, max: 1, axisLabel:{color:'#9fb2d9'}},
+          legend: {top: 0, textStyle:{color:'#9fb2d9'}},
+          color: colors,
+          tooltip: {trigger: 'axis'},
+          series: seriesMatrix.map((arr,idx)=> ({name: labels[idx] || ('S'+idx), type:'line', stack:'total', areaStyle:{}, data: arr.map((v,i)=> [len>1? i/(len-1): 0, Number(v)])}))
+        });
+        return;
+      }
+      el.innerHTML = '';
+      const canvas = document.createElement('canvas'); el.appendChild(canvas);
+      const ctx = canvas.getContext('2d'); const w = canvas.width = el.clientWidth; const h = canvas.height = el.clientHeight;
       ctx.clearRect(0,0,w,h);
       const n = seriesMatrix.length; const len = seriesMatrix[0]?.length || 0;
       const xStep = len>1? w/(len-1): w;
@@ -288,7 +392,6 @@
           ctx.lineTo(x,y);
         }
         ctx.closePath(); ctx.fill();
-        // 更新累计
         for (let i=0;i<len;i++) cumPrev[i] += series[i];
       }
       ctx.globalAlpha = 1;
@@ -297,9 +400,10 @@
 
     // 初始渲染占位（将由真实数据覆盖）
     drawBars('distBars', [20,35,18,12,10], DIST_LABELS);
-    drawStackedArea('stackedArea', [[0.5,0.6,0.55,0.58,0.62]]);
-    drawLine('interactionLine', Array.from({length:24}, (_,i)=> 0.4 + Math.sin(i/6)*0.1));
-    drawPie('disciplinePie', [30,20,10,15]);
+    const TREND_COLORS = [CAT_COLORS[0], CAT_COLORS[5], CAT_COLORS[1], CAT_COLORS[2], CAT_COLORS[4]];
+    drawStackedArea('stackedArea', [[0.5,0.6,0.55,0.58,0.62]], TREND_COLORS);
+    drawLine('interactionLine', Array.from({length:24}, (_,i)=> 0.4 + Math.sin(i/6)*0.1), CAT_COLORS[5], true);
+    drawPie('disciplinePie', [30,20,10,15], [CAT_COLORS[3], CAT_COLORS[2], CAT_COLORS[4], CAT_COLORS[1]]);
 
     // 上传交互
     fabUpload.onclick = () => { modalUpload.style.display = 'flex'; };
@@ -352,9 +456,9 @@
             const totalFrames = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
             const abnormal = counts.raise + counts.stand + counts.pass + counts.turn + counts.sleep + counts.down;
             // 更新检测状态信息
-            stDown.textContent = counts.down;
-            stSleep.textContent = counts.sleep;
-            stRaise.textContent = counts.raise;
+            if (stDown) stDown.textContent = counts.down;
+            if (stSleep) stSleep.textContent = counts.sleep;
+            if (stRaise) stRaise.textContent = counts.raise;
 
             // 签到与人数
             const list = r.attendance || [];
@@ -398,14 +502,16 @@
             const baseRatios = distVals.map(v => v / (totalFrames || 1));
             const mkSeries = (arr,len=24) => Array.from({length:len}, (_,i)=> arr[i % arr.length]);
             const seriesMatrix = baseRatios.map(ratio => mkSeries([ratio]));
-            drawStackedArea('stackedArea', seriesMatrix, CAT_COLORS);
+            const TREND_COLORS = [CAT_COLORS[0], CAT_COLORS[5], CAT_COLORS[1], CAT_COLORS[2], CAT_COLORS[4]];
+            drawStackedArea('stackedArea', seriesMatrix, TREND_COLORS);
 
             // 互动分析：举手+站立 比例折线
             const interactRatio = Math.min(1, (counts.raise + counts.stand) / totalFrames);
-            drawLine('interactionLine', mkSeries([interactRatio]));
+            drawLine('interactionLine', mkSeries([interactRatio]), CAT_COLORS[5], true);
 
             // 纪律分析：不良行为比例饼图（含看低头）
-            drawPie('disciplinePie', [counts.pass, counts.turn, counts.sleep, counts.down]);
+            drawPie('disciplinePie', [counts.pass, counts.turn, counts.sleep, counts.down], [CAT_COLORS[3], CAT_COLORS[2], CAT_COLORS[4], CAT_COLORS[1]]);
+            renderLegendDiscipline();
 
             uploadBtn.disabled = false;
           }

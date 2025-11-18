@@ -748,5 +748,237 @@
       ],
       "pipeline": "realtime"
     }
+  },
+  "b3253add8fa5420eaed0b5476d2b11f4": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/b3253add8fa5420eaed0b5476d2b11f4.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "1",
+          "status": "Unknown"
+        },
+        {
+          "name": "2",
+          "status": "Unknown"
+        },
+        {
+          "name": "3",
+          "status": "Unknown"
+        },
+        {
+          "name": "4",
+          "status": "Unknown"
+        },
+        {
+          "name": "5",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "0930f323be184f2ba92e64ea05dab81d": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/0930f323be184f2ba92e64ea05dab81d.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "1",
+          "status": "Unknown"
+        },
+        {
+          "name": "2",
+          "status": "Unknown"
+        },
+        {
+          "name": "3",
+          "status": "Unknown"
+        },
+        {
+          "name": "4",
+          "status": "Unknown"
+        },
+        {
+          "name": "5",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "ced61861eb4f43c180956f858e40243a": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/ced61861eb4f43c180956f858e40243a.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "1",
+          "status": "Unknown"
+        },
+        {
+          "name": "2",
+          "status": "Unknown"
+        },
+        {
+          "name": "3",
+          "status": "Unknown"
+        },
+        {
+          "name": "4",
+          "status": "Unknown"
+        },
+        {
+          "name": "5",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "f2da6e4a47b04105abeebd0fe49bba3d": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/f2da6e4a47b04105abeebd0fe49bba3d.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "1",
+          "status": "Unknown"
+        },
+        {
+          "name": "2",
+          "status": "Unknown"
+        },
+        {
+          "name": "3",
+          "status": "Unknown"
+        },
+        {
+          "name": "4",
+          "status": "Unknown"
+        },
+        {
+          "name": "5",
+          "status": "Unknown"
+        },
+        {
+          "name": "6",
+          "status": "Unknown"
+        },
+        {
+          "name": "7",
+          "status": "Unknown"
+        },
+        {
+          "name": "8",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "85bf84840d9d454db07ca37f746308d3": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/85bf84840d9d454db07ca37f746308d3.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "1",
+          "status": "Unknown"
+        },
+        {
+          "name": "2",
+          "status": "Unknown"
+        },
+        {
+          "name": "3",
+          "status": "Unknown"
+        },
+        {
+          "name": "4",
+          "status": "Unknown"
+        },
+        {
+          "name": "5",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
   }
 }
