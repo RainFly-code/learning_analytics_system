@@ -79,7 +79,7 @@
   </style>
 </head>
 <body>
-  <header><h1>多维学情剖析系统数据面板</h1></header>
+  <header><h1>学情分析系统数据面板</h1></header>
 
   <div class="wrap">
     <!-- 左侧列 -->
@@ -249,9 +249,9 @@
         const chart = echarts.getInstanceByDom(el) || echarts.init(el);
         const len = points.length;
         chart.setOption({
-          grid: {left: 40, right: 10, top: 10, bottom: 24},
-          xAxis: {type: 'value', min: 0, max: 1, axisLine: {lineStyle:{color:'#294064'}}, axisLabel:{color:'#9fb2d9'}},
-          yAxis: {type: 'value', min: 0, max: 1, axisLine:{lineStyle:{color:'#294064'}}, axisLabel:{color:'#9fb2d9'}},
+          grid: {left: 40, right: 10, top: 24, bottom: 32},
+          xAxis: {type: 'value', min: 0, max: 1, axisLine: {lineStyle:{color:'#294064'}}, axisLabel:{color:'#9fb2d9', margin:8}},
+          yAxis: {type: 'value', min: 0, max: 1, axisLine:{lineStyle:{color:'#294064'}}, axisLabel:{color:'#9fb2d9', margin:8}},
           tooltip: {trigger: 'axis'},
           series: [{type: 'line', data: points.map((v,i)=> [len>1? i/(len-1): 0, Number(v)]), smooth: true, areaStyle: {}, lineStyle:{color: color}, itemStyle:{color: color} }]
         });
@@ -261,7 +261,7 @@
       const canvas = document.createElement('canvas'); el.appendChild(canvas);
       const ctx = canvas.getContext('2d'); const w = canvas.width = el.clientWidth; const h = canvas.height = el.clientHeight;
       ctx.clearRect(0,0,w,h);
-      const m = showAxes ? {l:32,r:10,t:10,b:26} : {l:0,r:0,t:0,b:0};
+      const m = showAxes ? {l:32,r:10,t:18,b:34} : {l:0,r:0,t:0,b:0};
       const cw = Math.max(1, w - m.l - m.r); const ch = Math.max(1, h - m.t - m.b);
       const len = points.length; const step = len>1? cw/(len-1): cw;
       if (showAxes) {
@@ -363,9 +363,9 @@
         const len = seriesMatrix[0]?.length || 0;
         const labels = ['注意听讲','举手','低头','东张西望','睡觉'];
         chart.setOption({
-          grid: {left: 40, right: 10, top: 10, bottom: 24},
-          xAxis: {type: 'value', min: 0, max: 1, axisLabel:{color:'#9fb2d9'}},
-          yAxis: {type: 'value', min: 0, max: 1, axisLabel:{color:'#9fb2d9'}},
+          grid: {left: 40, right: 10, top: 50, bottom: 32},
+          xAxis: {type: 'value', min: 0, max: 1, axisLabel:{color:'#9fb2d9', margin:8}},
+          yAxis: {type: 'value', min: 0, max: 1, axisLabel:{color:'#9fb2d9', margin:8}},
           legend: {top: 0, textStyle:{color:'#9fb2d9'}},
           color: colors,
           tooltip: {trigger: 'axis'},
