@@ -56,3 +56,7 @@ PROCESSED_DIR = Path(__file__).resolve().parents[1] / 'processed' / 'videos'
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(PROCESSED_DIR, exist_ok=True)
+
+DEEPSEEK_API_KEY = 'sk-c8ac7756b9fc4f0eaf4cb00c60dc592b'
+DEEPSEEK_API_BASE = 'https://api.deepseek.com'
+DEEPSEEK_MODEL = 'deepseek-chat'

@@ -21,7 +21,7 @@
     .col-top { height: var(--video-h); display:grid; grid-template-rows: 1fr 1fr; gap:10px; overflow:hidden; }
     .push-bottom { margin-top:auto; }
     .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; }
-    .title { font-size:14px; color:var(--muted); margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; }
+    .title { font-size:18px; color:var(--muted); margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; }
     .stat-row { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:10px; }
     .stat { background:#0c1528; border:1px solid var(--border); border-radius:8px; padding:10px; }
     .stat .val { font-size:20px; font-weight:700; }
@@ -30,6 +30,8 @@
     .video .overlay { position:absolute; left:12px; top:12px; background:#0c1528cc; border:1px dashed #294064; padding:8px; border-radius:8px; font-size:12px; }
     .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .grid-3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
+    .course-info { display:grid; grid-template-columns: 15% 85%; gap:10px; align-items:stretch; }
+    .course-info .col-compact { display:flex; flex-direction:column; gap:10px; }
     .line { height:200px; background:var(--card); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; }
     .line > div, .line canvas { position:absolute; inset:0; }
     .pie { height:240px; display:flex; align-items:center; justify-content:center; position:relative; }
@@ -57,16 +59,17 @@
     th, td { border-bottom:1px solid var(--border); padding:6px; text-align:left; }
     .table-wrap { height:180px; overflow:auto; }
     /* 高度统一：趋势图、纪律饼图、底部三卡片 */
-    .col-left .line { height:280px; }
-    .col-right .pie { height:280px; }
+    .col-left .line { height:325px; }
+    .col-right .pie { height:325px; }
     .footer .card { height:170px; display:flex; flex-direction:column; }
     .muted { color:var(--muted); }
     .fab { position:fixed; right:20px; bottom:20px; background:var(--primary); color:#fff; border:none; border-radius:999px; padding:12px 16px; font-weight:700; cursor:pointer; box-shadow:0 6px 18px rgba(31,111,235,.3); }
     /* Modal 样式统一深色系并增加层次与动效 */
     .modal { position:fixed; inset:0; background:rgba(9,14,25,.55); backdrop-filter: blur(3px); display:none; align-items:center; justify-content:center; }
-    .modal .content { width:720px; border-radius:14px; padding:18px; border:1px solid #23375d; box-shadow: 0 12px 32px rgba(0,0,0,.35);
+    .modal .content { width:500px; border-radius:14px; padding:18px; border:1px solid #23375d; box-shadow: 0 12px 32px rgba(0,0,0,.35);
       background: linear-gradient(180deg, #0f1a2e 0%, #0c1528 100%); }
     .modal .title { padding-bottom:8px; border-bottom:1px solid var(--border); }
+    .modal .title strong { font-size:20px; }
     .form { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
     input[type="text"], textarea, input[type="file"] { width:100%; padding:10px; border-radius:10px; border:1px solid #274166; background:#0c1528; color:#e8eef9; transition:border-color .2s, box-shadow .2s; }
     input[type="text"]::placeholder, textarea::placeholder { color:#7d96c3; }
@@ -76,6 +79,9 @@
     .btn-sec { background:#26364f; color:#dbe7ff; }
     .progress { height:8px; background:#0c1528; border-radius:6px; overflow:hidden; border:1px solid #294064; }
     .progress > div { height:100%; background:var(--success); width:0%; transition: width 0.3s ease; }
+    #infoDesc { font-size:14px; line-height:1.4; width:100%; max-height:120px; overflow:auto; white-space:normal; word-break:break-word; }
+    #infoCourse { font-size:18px; }
+    #suggestions { height:160px; overflow:auto; }
   </style>
 </head>
 <body>
@@ -107,10 +113,12 @@
     <div class="col col-center">
       <div class="card">
         <div class="title">课程信息</div>
-        <div class="grid-3">
-          <div class="stat"><div class="muted">课程名称</div><div id="infoCourse" class="val">—</div></div>
+        <div class="course-info">
+          <div class="col-compact">
+            <div class="stat"><div class="muted">课程名称</div><div id="infoCourse" class="val">—</div></div>
+            <div class="stat"><div class="muted">总人数</div><div id="infoTotal" class="val">0</div></div>
+          </div>
           <div class="stat"><div class="muted">课程简介</div><div id="infoDesc" class="val">—</div></div>
-          <div class="stat"><div class="muted">总人数</div><div id="infoTotal" class="val">0</div></div>
         </div>
       </div>
       <div class="card video">
@@ -161,11 +169,7 @@
       </div>
       <div class="card">
         <div class="title">课堂建议</div>
-        <ul id="suggestions" class="muted" style="margin:0; padding-left:18px;">
-          <li>增加互动环节提升专注度</li>
-          <li>对高发不良行为时段进行课堂管理</li>
-          <li>优化课堂节奏，减少走神</li>
-        </ul>
+        <div id="suggestions" class="muted">暂无内容</div>
       </div>
     </div>
   </div>
@@ -176,20 +180,26 @@
     <div class="content">
       <div class="title"><strong>课程信息上传</strong><span id="statusText" class="muted"></span></div>
       <div class="form">
-        <div>
-          <label class="muted">课程名称</label>
+        <div style="grid-column: 1 / span 2;">
+          <label class="muted" style="font-size:18px;">课程名称</label>
           <input id="courseName" type="text" placeholder="如：高数-第5周" />
         </div>
-        <div>
-          <label class="muted">课程简介</label>
-          <input id="courseDesc" type="text" placeholder="简要描述" />
+        <div style="grid-column: 1 / span 2;">
+          <label class="muted" style="font-size:18px;">课程简介</label>
+          <textarea id="courseDesc" rows="4" placeholder="简要描述"></textarea>
         </div>
         <div style="grid-column: 1 / span 2;">
-          <label class="muted">学生名单（每行一个名字）</label>
-          <textarea id="students" rows="5" placeholder="张三\n李四\n..."></textarea>
+          <label class="muted" style="font-size:18px;">学生名单表格</label>
+          <input id="studentsFile" type="file" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" />
+        </div>
+        <div id="studentsPreview" class="table-wrap" style="grid-column: 1 / span 2;">
+          <table>
+            <thead><tr><th>序号</th><th>姓名</th></tr></thead>
+            <tbody id="studentsPreviewBody"></tbody>
+          </table>
         </div>
         <div style="grid-column: 1 / span 2;">
-          <label class="muted">课程监控视频</label>
+          <label class="muted" style="font-size:16px;">课程监控视频</label>
           <input id="videoFile" type="file" accept="video/*" />
         </div>
       </div>
@@ -197,13 +207,12 @@
         <button id="closeModal" class="btn btn-sec">关闭</button>
         <button id="uploadBtn" class="btn">上传并处理</button>
       </div>
-      <div class="progress" style="margin-top:10px;">
-        <div id="progressBar"></div>
-      </div>
+      
     </div>
   </div>
   
   <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js" onerror="(function(){var s=document.createElement('script');s.src='https://unpkg.com/echarts@5/dist/echarts.min.js';document.head.appendChild(s);})();"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     // 元素引用
     const resultVideo = document.getElementById('resultVideo');
@@ -231,15 +240,56 @@
     const closeModal = document.getElementById('closeModal');
     const uploadBtn = document.getElementById('uploadBtn');
     const statusText = document.getElementById('statusText');
-    const progressBar = document.getElementById('progressBar');
+    const studentsFile = document.getElementById('studentsFile');
+    const studentsPreviewBody = document.getElementById('studentsPreviewBody');
 
     let pollTimer = null;
+    let studentsList = [];
 
     // 颜色与标签（7 类行为）
     const CAT_COLORS = ['#1f6feb','#22c55e','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#94a3b8'];
     const CAT_CN = ['注意听讲','低头','东张西望','传递物品','睡觉','举手','站立'];
     const DIST_KEYS = ['normal','raise','down','turn','sleep'];
     const DIST_LABELS = ['注意听讲','举手','低头','东张西望','睡觉'];
+
+    function parseCSVText(t){
+      const lines = String(t||'').split(/\r?\n/);
+      const names = [];
+      for (let i=0;i<lines.length;i++){
+        const first = lines[i].split(/,|;|\t/)[0];
+        const n = String(first||'').trim();
+        if (n) names.push(n);
+      }
+      return names;
+    }
+    function setStudentsPreview(names){
+      if (!studentsPreviewBody) return;
+      studentsPreviewBody.innerHTML = names.map((n,i)=>`<tr><td>${i+1}</td><td>${n}</td></tr>`).join('');
+    }
+    if (studentsFile){
+      studentsFile.addEventListener('change', async ()=>{
+        const f = studentsFile.files && studentsFile.files[0];
+        if (!f) return;
+        try{
+          if (f.name.toLowerCase().endsWith('.csv')){
+            const txt = await f.text();
+            studentsList = parseCSVText(txt);
+            setStudentsPreview(studentsList);
+          } else {
+            const buf = await f.arrayBuffer();
+            if (window.XLSX){
+              const wb = XLSX.read(buf, { type:'array' });
+              const ws = wb.Sheets[wb.SheetNames[0]];
+              const rows = XLSX.utils.sheet_to_json(ws, { header:1 });
+              studentsList = (rows||[]).map(r=>String((r&&r[0])||'').trim()).filter(Boolean);
+              setStudentsPreview(studentsList);
+            } else {
+              alert('无法解析表格文件，请上传CSV或启用XLSX支持');
+            }
+          }
+        }catch(e){ alert('解析失败'); }
+      });
+    }
 
     // 简易图表占位渲染
     function drawLine(canvasId, points=[], color='#1f6feb', showAxes=false) {
@@ -413,16 +463,19 @@
       const fd = new FormData();
       fd.append('course_name', document.getElementById('courseName').value);
       fd.append('course_desc', document.getElementById('courseDesc').value);
-      const students = document.getElementById('students').value.split('\n').filter(Boolean).map(n => ({ name: n.trim() }));
+      const students = (studentsList || []).map(n => ({ name: String(n).trim() })).filter(s => s.name);
       fd.append('students', JSON.stringify(students));
       const file = document.getElementById('videoFile').files[0];
       if (file) fd.append('video', file);
       return fd;
     }
 
-    function setProgress(pct, msg) { progressBar.style.width = (pct||0) + '%'; statusText.textContent = msg || ''; }
+    function setProgress(pct, msg) { statusText.textContent = msg || ''; }
 
     async function startUpload() {
+      const file = document.getElementById('videoFile').files[0];
+      if (!file) { setProgress(0, '请选择监控视频'); return; }
+      if (!studentsList || studentsList.length === 0) { setProgress(0, '请先上传学生名单表格'); return; }
       uploadBtn.disabled = true; setProgress(0, '正在上传...');
       try {
         const res = await fetch('/api/courses/upload', { method: 'POST', body: toFormData() });
@@ -512,6 +565,38 @@
             // 纪律分析：不良行为比例饼图（含看低头）
             drawPie('disciplinePie', [counts.pass, counts.turn, counts.sleep, counts.down], [CAT_COLORS[3], CAT_COLORS[2], CAT_COLORS[4], CAT_COLORS[1]]);
             renderLegendDiscipline();
+
+            try {
+              const payload = {
+                course_name: document.getElementById('courseName').value || '—',
+                course_desc: document.getElementById('courseDesc').value || '—',
+                total_students: list.length || 0,
+                attendance_rate: attendRate,
+                focus_index: attentionRatio,
+                bad_ratio: badRatio,
+                counts: {
+                  normal: counts.normal,
+                  raise: counts.raise,
+                  down: counts.down,
+                  turn: counts.turn,
+                  pass: counts.pass,
+                  sleep: counts.sleep,
+                  stand: counts.stand
+                },
+                interaction_ratio: interactRatio,
+                discipline: { pass: counts.pass, turn: counts.turn, sleep: counts.sleep, down: counts.down }
+              };
+              const resp = await fetch('/api/suggestions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+              const sj = await resp.json();
+              const elSug = document.getElementById('suggestions');
+              if (elSug) {
+                const txt = (sj && sj.suggestions) ? String(sj.suggestions) : '生成失败';
+                elSug.innerHTML = txt.replace(/\n/g, '<br>');
+              }
+            } catch (e) {
+              const elSug = document.getElementById('suggestions');
+              if (elSug) elSug.textContent = '生成失败';
+            }
 
             uploadBtn.disabled = false;
           }
