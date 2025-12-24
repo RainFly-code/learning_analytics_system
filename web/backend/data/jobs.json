@@ -1560,5 +1560,130 @@
       ],
       "pipeline": "realtime"
     }
+  },
+  "aec7ba11b4074221b2776c842c182cfe": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/aec7ba11b4074221b2776c842c182cfe.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "张三",
+          "status": "Unknown"
+        },
+        {
+          "name": "王五",
+          "status": "Unknown"
+        },
+        {
+          "name": "李四",
+          "status": "Unknown"
+        },
+        {
+          "name": "李东",
+          "status": "Unknown"
+        },
+        {
+          "name": "丁冬",
+          "status": "Unknown"
+        },
+        {
+          "name": "钱孙",
+          "status": "Unknown"
+        },
+        {
+          "name": "孙琦",
+          "status": "Unknown"
+        },
+        {
+          "name": "秦怡",
+          "status": "Unknown"
+        },
+        {
+          "name": "杜威",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "dc9e8f46b8ae48449e6e4911e50ca814": {
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成（realtime）；人脸检测/识别统计：检测到 401 张人脸，识别成功 391 张，最高相似度 0.97；识别到：刘琪",
+    "result": {
+      "processed_video": "/processed/videos/dc9e8f46b8ae48449e6e4911e50ca814.mp4",
+      "behavior_stats": {
+        "Normal Listening": 216,
+        "Raising Hand": 245,
+        "Standing": 59,
+        "Passing Objects": 241,
+        "Turning Around": 234,
+        "Sleeping": 75,
+        "Looking Down": 12
+      },
+      "attendance": [
+        {
+          "name": "刘琪",
+          "status": "Present"
+        },
+        {
+          "name": "张三",
+          "status": "Unknown"
+        },
+        {
+          "name": "王五",
+          "status": "Unknown"
+        },
+        {
+          "name": "李四",
+          "status": "Unknown"
+        },
+        {
+          "name": "李东",
+          "status": "Unknown"
+        },
+        {
+          "name": "丁冬",
+          "status": "Unknown"
+        },
+        {
+          "name": "钱孙",
+          "status": "Unknown"
+        },
+        {
+          "name": "孙琦",
+          "status": "Unknown"
+        },
+        {
+          "name": "秦怡",
+          "status": "Unknown"
+        },
+        {
+          "name": "杜威",
+          "status": "Unknown"
+        }
+      ],
+      "pipeline": "realtime"
+    }
+  },
+  "7c516b3ffb7b429994d6e24b4b841ea8": {
+    "status": "processing",
+    "progress": 10,
+    "message": "启动行为检测..."
   }
 }
